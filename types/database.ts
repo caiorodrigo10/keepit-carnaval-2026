@@ -18,6 +18,14 @@ export type ModerationAction = "approved" | "rejected" | "blocked";
 export type UserRole = "admin" | "moderator" | "photographer";
 export type LeadOrigin = "qr_code" | "spontaneous" | "traffic";
 export type ScreenStatus = "online" | "offline" | "paused";
+export type AiGenerationStatus =
+  | "uploading"
+  | "queued"
+  | "processing"
+  | "copying"
+  | "completed"
+  | "failed"
+  | "expired";
 
 export interface Database {
   public: {
@@ -315,6 +323,129 @@ export interface Database {
           }
         ];
       };
+      ai_photo_templates: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          description: string | null;
+          preview_url: string;
+          template_image_url: string;
+          prompt: string;
+          aspect_ratio: string;
+          resolution: string;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          description?: string | null;
+          preview_url: string;
+          template_image_url: string;
+          prompt: string;
+          aspect_ratio?: string;
+          resolution?: string;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          description?: string | null;
+          preview_url?: string;
+          template_image_url?: string;
+          prompt?: string;
+          aspect_ratio?: string;
+          resolution?: string;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_photo_generations: {
+        Row: {
+          id: string;
+          lead_id: string;
+          template_id: string;
+          status: AiGenerationStatus;
+          reference_photos: string[];
+          variant_1_url: string | null;
+          variant_1_fal_request_id: string | null;
+          variant_1_status: string;
+          variant_2_url: string | null;
+          variant_2_fal_request_id: string | null;
+          variant_2_status: string;
+          variant_3_url: string | null;
+          variant_3_fal_request_id: string | null;
+          variant_3_status: string;
+          error_message: string | null;
+          processing_time_ms: number | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          lead_id: string;
+          template_id: string;
+          status?: AiGenerationStatus;
+          reference_photos?: string[];
+          variant_1_url?: string | null;
+          variant_1_fal_request_id?: string | null;
+          variant_1_status?: string;
+          variant_2_url?: string | null;
+          variant_2_fal_request_id?: string | null;
+          variant_2_status?: string;
+          variant_3_url?: string | null;
+          variant_3_fal_request_id?: string | null;
+          variant_3_status?: string;
+          error_message?: string | null;
+          processing_time_ms?: number | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string;
+          template_id?: string;
+          status?: AiGenerationStatus;
+          reference_photos?: string[];
+          variant_1_url?: string | null;
+          variant_1_fal_request_id?: string | null;
+          variant_1_status?: string;
+          variant_2_url?: string | null;
+          variant_2_fal_request_id?: string | null;
+          variant_2_status?: string;
+          variant_3_url?: string | null;
+          variant_3_fal_request_id?: string | null;
+          variant_3_status?: string;
+          error_message?: string | null;
+          processing_time_ms?: number | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_photo_generations_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_photo_generations_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_photo_templates";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -329,6 +460,7 @@ export interface Database {
       user_role: UserRole;
       lead_origin: LeadOrigin;
       screen_status: ScreenStatus;
+      ai_generation_status: AiGenerationStatus;
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -357,3 +489,5 @@ export type ModerationLog = Tables<"moderation_log">;
 export type Screen = Tables<"screens">;
 export type ScreenQueue = Tables<"screen_queue">;
 export type BlockedUser = Tables<"blocked_users">;
+export type AiPhotoTemplate = Tables<"ai_photo_templates">;
+export type AiPhotoGeneration = Tables<"ai_photo_generations">;

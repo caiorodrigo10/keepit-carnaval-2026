@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;900&family=Titillium+Web:wght@400;600;700&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,131 +41,148 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Keepit brand colors */
+  /* Keepit brand colors — aligned with globalkeepit.com */
   --color-keepit-neon: #66FB95;
-  --color-keepit-neon-light: #8FFCB0;
-  --color-keepit-neon-dark: #61CE70;
+  --color-keepit-neon-light: #6EE7B7;
+  --color-keepit-neon-dark: #059669;
+  --color-keepit-emerald: #10B981;
+  --color-keepit-emerald-light: #34D399;
+  --color-keepit-emerald-dark: #059669;
   --color-keepit-brand: #34BF58;
   --color-keepit-secondary: #67FB94;
-  --color-keepit-dark: #1E1E1E;
-  --color-keepit-text: #4A4A4A;
-  --color-keepit-bg: #F1F1F1;
-  --color-keepit-gray: #9E9E9E;
+  --color-keepit-lime: #D4F27A;
+  --color-keepit-mint: #E0F4EE;
+  --color-keepit-mint-light: #ECFDF5;
+  --color-keepit-dark: #1A1A1A;
+  --color-keepit-dark-muted: rgba(26, 26, 26, 0.6);
+  --color-keepit-text: #1A1A1A;
+  --color-keepit-bg: #F8FAF9;
+  --color-keepit-gray: #6B7280;
+  --color-keepit-gray-light: #9CA3AF;
 
   /* Event theme (dynamic) */
-  --color-event-primary: var(--event-primary, #34BF58);
-  --color-event-secondary: var(--event-secondary, #67FB94);
+  --color-event-primary: var(--event-primary, #10B981);
+  --color-event-secondary: var(--event-secondary, #34D399);
 
-  /* Fonts */
-  --font-sans: 'Montserrat', system-ui, sans-serif;
-  --font-heading: 'Titillium Web', system-ui, sans-serif;
-  --font-body: 'Inter', 'Montserrat', system-ui, sans-serif;
+  /* Fonts — Inter only, matching globalkeepit.com */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* Border radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  /* Border radius — pill-first approach like globalkeepit.com */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 40px;
+  --radius-3xl: 50px;
+  --radius-4xl: 64px;
+  --radius-pill: 9999px;
 
-  /* Shadows */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-dropdown: 0 10px 40px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 0 20px rgba(102, 251, 149, 0.3);
-  --shadow-glow-strong: 0 0 40px rgba(102, 251, 149, 0.5);
-  --shadow-button: 0 12px 24px rgba(0, 0, 0, 0.15);
+  /* Shadows — soft, diffused like globalkeepit.com */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-dropdown: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+  --shadow-button: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+  --shadow-button-sm: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-dramatic: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
+  --shadow-mega: 0 60px 120px -20px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+  --shadow-glow-strong: 0 0 40px rgba(16, 185, 129, 0.5);
 
-  /* Transitions */
+  /* Transitions — matching globalkeepit.com curves */
   --transition-fast: 150ms;
   --transition-normal: 300ms;
   --transition-slow: 500ms;
+  --transition-entrance: 1400ms;
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 24px;
 
-  /* Light mode (Admin dashboard) */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.64 0.2 145); /* #66FB95 approximation */
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.65 0.19 145); /* #67FB94 approximation */
-  --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.64 0.2 145 / 0.1);
-  --accent-foreground: oklch(0.64 0.2 145);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.64 0.2 145);
+  /* Light mode — aligned with globalkeepit.com palette */
+  --background: #F8FAF9;
+  --foreground: #1A1A1A;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+  --primary: #1A1A1A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F8FAF9;
+  --secondary-foreground: #1A1A1A;
+  --muted: #F8FAF9;
+  --muted-foreground: #6B7280;
+  --accent: #10B981;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.05);
+  --input: rgba(0, 0, 0, 0.05);
+  --ring: #10B981;
 
   /* Chart colors */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --chart-1: #10B981;
+  --chart-2: #F59E0B;
+  --chart-3: #6366F1;
+  --chart-4: #F97316;
+  --chart-5: #8B5CF6;
 
   /* Sidebar */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1A1A;
+  --sidebar-primary: #1A1A1A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F8FAF9;
+  --sidebar-accent-foreground: #1A1A1A;
+  --sidebar-border: rgba(0, 0, 0, 0.05);
+  --sidebar-ring: #10B981;
 
   /* Event theme defaults */
-  --event-primary: #34BF58;
-  --event-secondary: #67FB94;
+  --event-primary: #10B981;
+  --event-secondary: #34D399;
 }
 
 .dark {
-  /* Dark mode (Landing/Gate pages) */
-  --background: oklch(0 0 0);
-  --foreground: oklch(1 0 0);
-  --card: oklch(0.08 0.01 260);
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.08 0.01 260);
-  --popover-foreground: oklch(1 0 0);
-  --primary: oklch(0.64 0.2 145);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.65 0.19 145);
-  --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.14 0.01 260);
-  --muted-foreground: oklch(0.74 0 0);
-  --accent: oklch(0.64 0.2 145 / 0.1);
-  --accent-foreground: oklch(0.64 0.2 145);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.2 0.01 260);
-  --input: oklch(0.14 0.01 260);
-  --ring: oklch(0.64 0.2 145);
+  /* Dark mode — for dark sections and Gate pages */
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: rgba(255, 255, 255, 0.03);
+  --card-foreground: #FFFFFF;
+  --popover: #1A1A1A;
+  --popover-foreground: #FFFFFF;
+  --primary: #FFFFFF;
+  --primary-foreground: #000000;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: #FFFFFF;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --accent: #10B981;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.05);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: #10B981;
 
-  /* Chart colors */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  /* Chart colors dark */
+  --chart-1: #34D399;
+  --chart-2: #FCD34D;
+  --chart-3: #818CF8;
+  --chart-4: #FB923C;
+  --chart-5: #A78BFA;
 
-  /* Sidebar */
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Sidebar dark */
+  --sidebar: #1A1A1A;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #10B981;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --sidebar-ring: #10B981;
 }
 
 @layer base {
@@ -175,9 +192,33 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  /* Typography — matching globalkeepit.com tight heading style */
+  h1 {
     font-family: var(--font-heading);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+  }
+  h2 {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+  }
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -190,31 +231,233 @@
   scrollbar-width: none;
 }
 
-/* Glow animation for buttons */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(102, 251, 149, 0.3);
+/* Section backgrounds — matching globalkeepit.com palette */
+.section-hero {
+  background-color: #F8FAF9;
+}
+.section-white {
+  background-color: #FFFFFF;
+}
+.section-dark {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+.section-lime {
+  background-color: #D4F27A;
+  color: #000000;
+}
+.section-mint {
+  background-color: #E0F4EE;
+  color: #1A1A1A;
+}
+
+/* Pill button base */
+.btn-pill {
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-pill-primary {
+  background-color: #1A1A1A;
+  color: #FFFFFF;
+  padding: 20px 56px;
+  font-size: 18px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+}
+.btn-pill-primary:hover {
+  background-color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+}
+.btn-pill-secondary {
+  background-color: #FFFFFF;
+  color: #000000;
+  padding: 20px 48px;
+  font-size: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn-pill-secondary:hover {
+  background-color: #F8FAF9;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+.btn-pill-sm {
+  padding: 12px 32px;
+  font-size: 14px;
+}
+
+/* Card styles — soft, rounded like globalkeepit.com */
+.card-keepit {
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-keepit:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+.card-keepit-dark {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Feature card color tints */
+.card-tint-green {
+  background: rgba(209, 250, 229, 0.4);
+}
+.card-tint-orange {
+  background: rgba(255, 237, 213, 0.3);
+}
+.card-tint-indigo {
+  background: rgba(238, 242, 255, 0.5);
+}
+.card-tint-mint {
+  background: rgba(236, 253, 245, 0.5);
+}
+.card-tint-blue {
+  background: rgba(219, 234, 254, 0.4);
+}
+.card-tint-purple {
+  background: rgba(237, 233, 254, 0.4);
+}
+.card-tint-yellow {
+  background: rgba(254, 249, 195, 0.4);
+}
+.card-tint-pink {
+  background: rgba(252, 231, 243, 0.4);
+}
+
+/* Input pill style — matching globalkeepit.com */
+.input-pill {
+  border-radius: 9999px;
+  padding: 24px 40px;
+  font-size: 18px;
+  background: rgba(249, 250, 251, 0.5);
+  border: none;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.input-pill:focus {
+  background: rgba(249, 250, 251, 0.8);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Badge/pill label — matching globalkeepit.com badge style */
+.badge-keepit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  padding: 12px 24px;
+  font-size: 12px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: #1A1A1A;
+  color: #FFFFFF;
+}
+
+/* Step number circles */
+.step-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+.step-circle-1 { background-color: #10B981; }
+.step-circle-2 { background-color: #F97316; }
+.step-circle-3 { background-color: #6366F1; }
+
+/* Gradient text accent (italic emerald like globalkeepit.com) */
+.text-gradient-green {
+  background: linear-gradient(to right, #059669, #34D399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-style: italic;
+}
+
+/* Entrance animations — matching globalkeepit.com timing */
+@keyframes keepit-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
-  50% {
-    box-shadow: 0 0 40px rgba(102, 251, 149, 0.5);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Fade in animation */
-@keyframes fadeIn {
+@keyframes keepit-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+@keyframes keepit-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-keepit-fade-up {
+  animation: keepit-fade-up 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.animate-keepit-fade-up-delay-1 {
+  animation: keepit-fade-up 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s forwards;
+  opacity: 0;
+}
+.animate-keepit-fade-up-delay-2 {
+  animation: keepit-fade-up 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+  opacity: 0;
+}
+.animate-keepit-fade-up-delay-3 {
+  animation: keepit-fade-up 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+  opacity: 0;
+}
+.animate-keepit-fade-in {
+  animation: keepit-fade-in 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.animate-keepit-scale-in {
+  animation: keepit-scale-in 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s forwards;
+  opacity: 0;
+}
+
+/* Legacy glow animation (for CTAs) */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Legacy fade/slide animations (kept for compatibility) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Slide in from bottom */
 @keyframes slideInFromBottom {
   from {
     transform: translateY(20px);
@@ -225,17 +468,14 @@
     opacity: 1;
   }
 }
-
 .animate-slide-in-bottom {
   animation: slideInFromBottom 0.3s ease-out;
 }
 
-/* Zoom in animation */
 @keyframes zoomIn {
   from { transform: scale(0.95); }
   to { transform: scale(1); }
 }
-
 .animate-zoom-in {
   animation: zoomIn 0.2s ease-out;
 }

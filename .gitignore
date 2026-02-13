@@ -44,3 +44,49 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database backups
+/backups/
+
+# Environment & Secrets (AIOS)
+*.key
+
+# Dependencies (AIOS)
+node_modules/
+
+# Build & Logs (AIOS)
+dist/
+build/
+*.log
+logs/
+
+# IDE & OS (AIOS)
+Thumbs.db
+.idea/
+*.swp
+
+# AIOS Local (AIOS)
+.aios-core/local/
+.claude/settings.local.json
+.aios/install-log.txt
+
+# AIOS framework (not needed for deploy)
+.aios-core/
+
+# Claude Code
+.claude/
+.playwright-mcp/
+
+# Screenshots and test images
+*.png
+!public/**/*.png
+
+# Archive and test folders
+_archive/
+_test-photos/
+
+# Markdown docs (development only)
+BACKEND-AI-PHOTOS.md
+EXPERIMENTO-KIE.md
+PENDENCIAS-AI-PHOTOS.md
+PLANO-AI-PHOTOS.md
