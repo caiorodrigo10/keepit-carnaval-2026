@@ -484,28 +484,6 @@ export default function GatePage() {
                   <div className="flex items-start gap-3 pt-2">
                     <input
                       type="checkbox"
-                      id="franchise"
-                      checked={formData.franchise_interest}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          franchise_interest: e.target.checked,
-                        }))
-                      }
-                      className="mt-1 h-4 w-4 rounded border-keepit-dark/20 accent-keepit-emerald"
-                      disabled={isLoading}
-                    />
-                    <label
-                      htmlFor="franchise"
-                      className="text-sm text-keepit-dark/60 cursor-pointer"
-                    >
-                      Tenho interesse em ser franqueado Keepit
-                    </label>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
                       id="lgpd"
                       checked={formData.lgpd_consent}
                       onChange={(e) =>

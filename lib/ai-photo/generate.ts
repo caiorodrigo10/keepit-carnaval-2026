@@ -93,21 +93,32 @@ export async function createGeneration(
   const generationId = generation.id;
   const startTime = Date.now();
 
-  // Build full identity transfer prompt: reference photo (person) + template (body/scene)
-  // Send only the first reference photo as identity source
-  const prompt = `Replace the entire person in image 2 with the person from image 1. The person from image 1 should appear wearing the same outfit and in the same pose as image 2. All skin (face, neck, chest, arms, hands) must match the person from image 1. Keep background and lighting from image 2.`;
+  // Build identity-preserving prompt using ALL reference photos
+  const refCount = referencePhotos.length;
+  const lastImageIndex = refCount + 1; // template is the last image
+  const refImagesList = refCount === 1
+    ? "image 1"
+    : `images 1 through ${refCount}`;
+
+  const prompt = [
+    `CRITICAL: This is a face identity transfer task. The EXACT same person from ${refImagesList} must appear in image ${lastImageIndex}.`,
+    `The generated face MUST be a perfect match — same bone structure, same eyes, same nose shape, same lips, same skin tone, same facial proportions, same ethnicity.`,
+    `Do NOT generate a similar-looking person. The face must be IDENTICAL and recognizable as the same individual.`,
+    `Use ALL ${refCount} reference photo(s) to accurately capture every facial detail: wrinkles, moles, freckles, jawline, eyebrow shape, hairline.`,
+    `Place this exact person into the pose, outfit, and scene from image ${lastImageIndex}. Keep the background, lighting, and composition from image ${lastImageIndex}.`,
+    `The result should look like a real photograph of THIS specific person in that scene.`,
+  ].join(" ");
 
   console.log("[generate] Starting generation:", generationId);
   console.log("[generate] Template:", template.slug, "| Template image:", template.template_image_url);
-  console.log("[generate] Reference photo (face):", referencePhotos[0]);
-  console.log("[generate] Reference photos available:", referencePhotos.length, "(using first)");
+  console.log("[generate] Reference photos:", referencePhotos.length, "(sending ALL)");
   console.log("[generate] Prompt:", prompt);
 
-  // 2. Generate via Kie.ai (nano-banana-pro)
+  // 2. Generate via Kie.ai (nano-banana-pro) — send ALL reference photos
   try {
     console.log("[generate] Calling Kie.ai nano-banana-pro...");
     const imageBuffer = await generateImage({
-      referencePhotoUrls: [referencePhotos[0]],
+      referencePhotoUrls: referencePhotos,
       templateImageUrl: template.template_image_url,
       prompt,
     });
