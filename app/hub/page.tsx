@@ -156,17 +156,17 @@ export default function HubPage() {
 
       {/* ---- Welcome Section ---- */}
       <section className="section-white">
-        <div className="max-w-6xl mx-auto px-6 pt-16 pb-12 md:pt-20 md:pb-16">
+        <div className="max-w-6xl mx-auto px-5 pt-10 pb-6 md:px-6 md:pt-20 md:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: ENTRANCE_DURATION, ease: ENTRANCE_EASE }}
           >
-            <h1 className="text-4xl sm:text-5xl font-black tracking-[-0.05em] leading-[0.95] text-keepit-dark mb-4">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-[-0.04em] leading-[0.95] text-keepit-dark mb-2 md:mb-4">
               Ola, <span className="text-gradient-green">{firstName}</span>!
             </h1>
-            <p className="text-lg text-keepit-dark/60 max-w-md">
+            <p className="text-base md:text-lg text-keepit-dark/60 max-w-md">
               Aproveite sua experiencia completa no Carnaval do Anhembi.
             </p>
           </motion.div>
@@ -174,13 +174,13 @@ export default function HubPage() {
       </section>
 
       {/* ---- Feature Cards Grid ---- */}
-      <section className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+      <section className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-16">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6"
         >
           {featureCards.map((feature) => {
             const IconComponent = feature.icon;
@@ -193,28 +193,28 @@ export default function HubPage() {
                     ? window.open(feature.href, "_blank")
                     : router.push(feature.href)
                 }
-                className={`card-keepit ${feature.tint} cursor-pointer group p-8 md:p-10 flex flex-col relative overflow-hidden`}
+                className={`card-keepit ${feature.tint} cursor-pointer group p-4 md:p-10 flex flex-col relative overflow-hidden`}
               >
                 {/* Icon */}
                 <div
-                  className={`h-14 w-14 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  className={`h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl ${feature.bgColor} flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform duration-300`}
                 >
-                  <IconComponent className={`h-7 w-7 ${feature.color}`} />
+                  <IconComponent className={`h-5 w-5 md:h-7 md:w-7 ${feature.color}`} />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-2xl font-black tracking-tight text-keepit-dark mb-2">
+                <h3 className="text-base md:text-2xl font-black tracking-tight text-keepit-dark mb-1 md:mb-2">
                   {feature.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm text-keepit-dark/60 leading-relaxed mb-6">
+                <p className="text-xs md:text-sm text-keepit-dark/60 leading-relaxed mb-3 md:mb-6">
                   {feature.description}
                 </p>
 
                 {/* Arrow */}
                 <div className="mt-auto">
-                  <ArrowRight className="h-5 w-5 text-keepit-dark/20 group-hover:text-keepit-dark/60 group-hover:translate-x-1 transition-all duration-300" />
+                  <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-keepit-dark/20 group-hover:text-keepit-dark/60 group-hover:translate-x-1 transition-all duration-300" />
                 </div>
               </motion.div>
             );
@@ -224,25 +224,25 @@ export default function HubPage() {
 
       {/* ---- Keepit Franchise CTA ---- */}
       <section className="section-mint">
-        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto px-5 py-10 md:px-6 md:py-24">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: ENTRANCE_DURATION, ease: ENTRANCE_EASE }}
-            className="flex flex-col md:flex-row items-start md:items-center gap-8"
+            className="flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-8"
           >
             {/* Icon */}
-            <div className="h-16 w-16 rounded-2xl bg-keepit-emerald/20 flex items-center justify-center shrink-0">
-              <Store className="h-8 w-8 text-keepit-emerald" />
+            <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-keepit-emerald/20 flex items-center justify-center shrink-0">
+              <Store className="h-6 w-6 md:h-8 md:w-8 text-keepit-emerald" />
             </div>
 
             {/* Copy */}
             <div className="flex-1">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.05em] leading-[0.95] text-keepit-dark mb-4">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-[-0.04em] leading-[0.95] text-keepit-dark mb-2 md:mb-4">
                 Conheca a <span className="text-gradient-green">Keepit</span>
               </h2>
-              <p className="text-keepit-dark/60 text-lg max-w-lg mb-8">
+              <p className="text-keepit-dark/60 text-base md:text-lg max-w-lg mb-5 md:mb-8">
                 Armarios inteligentes para guarda-volumes. Seja um franqueado e
                 faca parte desta revolucao!
               </p>

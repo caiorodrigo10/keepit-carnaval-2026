@@ -48,30 +48,7 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // Check if email or phone already exists
-    const { data: existingLead } = await supabase
-      .from("leads")
-      .select("id, name, email, phone, created_at")
-      .or(`email.eq.${body.email.toLowerCase().trim()},phone.eq.${phoneDigits}`)
-      .single();
-
-    if (existingLead) {
-      // Return existing lead info for localStorage
-      return NextResponse.json({
-        success: true,
-        message: "Voce ja esta cadastrado!",
-        lead: {
-          id: existingLead.id,
-          name: existingLead.name,
-          email: existingLead.email,
-          phone: existingLead.phone,
-          created_at: existingLead.created_at,
-        },
-        existing: true,
-      });
-    }
-
-    // Insert new lead
+    // Insert new lead (duplicates allowed — same person can register multiple times)
     const { data: newLead, error } = await supabase
       .from("leads")
       .insert({
@@ -86,14 +63,6 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      // Handle unique constraint violation
-      if (error.code === "23505") {
-        return NextResponse.json(
-          { error: "Email ou telefone ja cadastrado" },
-          { status: 409 }
-        );
-      }
-
       return NextResponse.json(
         { error: "Erro ao cadastrar. Tente novamente." },
         { status: 500 }

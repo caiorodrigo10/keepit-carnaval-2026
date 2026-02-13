@@ -142,11 +142,7 @@ export default function GatePage() {
         .single();
 
       if (error) {
-        if (error.code === "23505") {
-          setErrors({ email: "Este e-mail ja esta cadastrado" });
-        } else {
-          setErrors({ form: "Erro ao cadastrar. Tente novamente." });
-        }
+        setErrors({ form: "Erro ao cadastrar. Tente novamente." });
         setIsLoading(false);
         return;
       }
