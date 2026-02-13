@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Camera,
   MapPin,
@@ -12,6 +13,7 @@ import {
   Gift,
   ArrowRight,
   Store,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
@@ -53,16 +55,6 @@ const itemVariants = {
 /* ------------------------------------------------------------------ */
 const featureCards = [
   {
-    id: "ai-photo",
-    icon: Sparkles,
-    title: "Foto com IA",
-    description: "Crie sua foto com IA em um cenario carnavalesco!",
-    href: "/hub/ai-photo",
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/15",
-    tint: "card-tint-orange",
-  },
-  {
     id: "loja",
     icon: Store,
     title: "Loja Keepit",
@@ -77,17 +69,17 @@ const featureCards = [
     id: "mural",
     icon: Camera,
     title: "Mural de Fotos",
-    description: "Veja todas as fotos do evento e apareca no telao!",
+    description: "Veja todas as fotos do evento e apareça no telão!",
     href: "/mural",
-    color: "text-keepit-brand",
-    bgColor: "bg-keepit-brand/15",
-    tint: "card-tint-green",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/15",
+    tint: "card-tint-orange",
   },
   {
     id: "mapa",
     icon: MapPin,
     title: "Mapa Interativo",
-    description: "Encontre palcos, banheiros e a area Keepit.",
+    description: "Encontre palcos, banheiros e a área Keepit.",
     href: "/mapa",
     color: "text-blue-500",
     bgColor: "bg-blue-500/15",
@@ -96,8 +88,8 @@ const featureCards = [
   {
     id: "programacao",
     icon: Calendar,
-    title: "Programacao",
-    description: "Horarios dos desfiles e atracoes do evento.",
+    title: "Programação",
+    description: "Horários dos desfiles e atrações do evento.",
     href: "/programacao",
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/15",
@@ -107,7 +99,7 @@ const featureCards = [
     id: "sorteio",
     icon: Sparkles,
     title: "Sorteios",
-    description: "Acompanhe sua participacao nos sorteios exclusivos!",
+    description: "Acompanhe sua participação nos sorteios exclusivos!",
     href: "/sorteio",
     color: "text-yellow-500",
     bgColor: "bg-yellow-500/15",
@@ -117,7 +109,7 @@ const featureCards = [
     id: "upload",
     icon: Upload,
     title: "Enviar Foto",
-    description: "Envie sua foto e apareca no mural e no telao!",
+    description: "Envie sua foto e apareça no mural e no telão!",
     href: "/upload",
     color: "text-pink-500",
     bgColor: "bg-pink-500/15",
@@ -163,14 +155,60 @@ export default function HubPage() {
             viewport={{ once: true }}
             transition={{ duration: ENTRANCE_DURATION, ease: ENTRANCE_EASE }}
           >
-            <h1 className="text-3xl sm:text-5xl font-black tracking-[-0.04em] leading-[0.95] text-keepit-dark mb-2 md:mb-4">
-              Ola, <span className="text-gradient-green">{firstName}</span>!
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-keepit-dark mb-2 md:mb-4">
+              Olá, <span className="text-keepit-brand">{firstName}</span>!
             </h1>
             <p className="text-base md:text-lg text-keepit-dark/60 max-w-md">
-              Aproveite sua experiencia completa no Carnaval do Anhembi.
+              Aproveite sua experiência completa no Carnaval do Anhembi.
             </p>
           </motion.div>
         </div>
+      </section>
+
+      {/* ---- AI Photo Highlight ---- */}
+      <section className="max-w-6xl mx-auto px-4 pt-2 pb-4 md:px-6 md:pt-4 md:pb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: ENTRANCE_DURATION, ease: ENTRANCE_EASE }}
+          onClick={() => router.push("/hub/ai-photo")}
+          className="card-keepit card-tint-purple cursor-pointer group relative overflow-hidden rounded-3xl"
+        >
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 p-5 md:p-10">
+            {/* Template preview */}
+            <div className="relative w-full md:w-56 h-48 md:h-56 rounded-2xl overflow-hidden shrink-0">
+              <Image
+                src="/modeloskeepit/keepittemplate1.jpg"
+                alt="Exemplo de foto com IA"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            </div>
+
+            {/* Copy */}
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-purple-500/15 text-purple-600 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-3">
+                <Wand2 className="h-3.5 w-3.5" />
+                Novidade
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-[-0.04em] leading-[0.95] text-keepit-dark mb-2 md:mb-3">
+                Crie sua foto com{" "}
+                <span className="text-purple-500">IA</span>
+              </h2>
+              <p className="text-sm md:text-base text-keepit-dark/60 max-w-md mb-4 md:mb-6">
+                Escolha um template exclusivo e gere uma foto incrível com
+                inteligência artificial. É rápido e gratuito!
+              </p>
+              <Button className="btn-pill btn-pill-primary inline-flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Criar minha foto
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* ---- Feature Cards Grid ---- */}
@@ -180,7 +218,7 @@ export default function HubPage() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-6"
         >
           {featureCards.map((feature) => {
             const IconComponent = feature.icon;
@@ -240,11 +278,11 @@ export default function HubPage() {
             {/* Copy */}
             <div className="flex-1">
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-[-0.04em] leading-[0.95] text-keepit-dark mb-2 md:mb-4">
-                Conheca a <span className="text-gradient-green">Keepit</span>
+                Conheça a <span className="text-gradient-green">Keepit</span>
               </h2>
               <p className="text-keepit-dark/60 text-base md:text-lg max-w-lg mb-5 md:mb-8">
-                Armarios inteligentes para guarda-volumes. Seja um franqueado e
-                faca parte desta revolucao!
+                Armários inteligentes para guarda-volumes. Seja um franqueado e
+                faça parte desta revolução!
               </p>
               <Button
                 onClick={() => window.open("https://globalkeepit.com", "_blank")}
