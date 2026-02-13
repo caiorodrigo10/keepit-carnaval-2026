@@ -10,8 +10,9 @@ export const EVENT_CONFIG = {
   name: "Carnaval SP 2026",
   venue: "Sambódromo do Anhembi",
   dates: {
-    day1: "2026-02-17",
-    day2: "2026-02-18",
+    day1: "2026-02-13",
+    day2: "2026-02-14",
+    day3: "2026-02-15",
   },
   timezone: "America/Sao_Paulo",
 } as const;

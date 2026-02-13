@@ -36,7 +36,7 @@ import type { Photo } from "@/types/database";
 
 const PHOTOS_PER_PAGE = 20;
 
-type DateFilter = "all" | "today" | "yesterday" | "feb17" | "feb18";
+type DateFilter = "all" | "today" | "yesterday" | "feb13" | "feb14" | "feb15";
 
 function getDateRange(filter: DateFilter): { start: Date; end: Date } | null {
   if (filter === "all") return null;
@@ -57,20 +57,25 @@ function getDateRange(filter: DateFilter): { start: Date; end: Date } | null {
         end: today,
       };
     }
-    case "feb17": {
-      // February 17, 2026
-      const feb17 = new Date(2026, 1, 17);
+    case "feb13": {
+      const feb13 = new Date(2026, 1, 13);
       return {
-        start: feb17,
-        end: new Date(feb17.getTime() + 24 * 60 * 60 * 1000),
+        start: feb13,
+        end: new Date(feb13.getTime() + 24 * 60 * 60 * 1000),
       };
     }
-    case "feb18": {
-      // February 18, 2026
-      const feb18 = new Date(2026, 1, 18);
+    case "feb14": {
+      const feb14 = new Date(2026, 1, 14);
       return {
-        start: feb18,
-        end: new Date(feb18.getTime() + 24 * 60 * 60 * 1000),
+        start: feb14,
+        end: new Date(feb14.getTime() + 24 * 60 * 60 * 1000),
+      };
+    }
+    case "feb15": {
+      const feb15 = new Date(2026, 1, 15);
+      return {
+        start: feb15,
+        end: new Date(feb15.getTime() + 24 * 60 * 60 * 1000),
       };
     }
     default:
@@ -391,8 +396,9 @@ export function MuralContent() {
                 <SelectItem value="all">Todas as datas</SelectItem>
                 <SelectItem value="today">Hoje</SelectItem>
                 <SelectItem value="yesterday">Ontem</SelectItem>
-                <SelectItem value="feb17">17 de Fevereiro</SelectItem>
-                <SelectItem value="feb18">18 de Fevereiro</SelectItem>
+                <SelectItem value="feb13">13 de Fevereiro</SelectItem>
+                <SelectItem value="feb14">14 de Fevereiro</SelectItem>
+                <SelectItem value="feb15">15 de Fevereiro</SelectItem>
               </SelectContent>
             </Select>
           </div>

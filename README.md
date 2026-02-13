@@ -164,7 +164,7 @@ Configure as seguintes variaveis no dashboard do Vercel:
 ## Timeline
 
 - **Deadline desenvolvimento:** 06 de Fevereiro de 2026
-- **Evento:** 17 e 18 de Fevereiro de 2026
+- **Evento:** 13, 14 e 15 de Fevereiro de 2026
 
 ## Licenca
 

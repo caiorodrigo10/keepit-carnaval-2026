@@ -267,7 +267,7 @@ export default function GatePage() {
                     variant="outline"
                     size="lg"
                   >
-                    17 e 18 de Fevereiro
+                    13, 14 e 15 de Fevereiro
                   </Button>
                 </motion.div>
               </div>

@@ -33,7 +33,7 @@ Keepit Carnaval Sistema is an event experience and engagement system for Carniva
 
 **Timeline:**
 - Deadline: 06 de fevereiro de 2026 (4 dias)
-- Evento: 17 e 18 de fevereiro de 2026
+- Evento: 13, 14 e 15 de fevereiro de 2026
 
 **Stack:** Next.js 14+ (App Router), Supabase, Vercel, Tailwind CSS
 

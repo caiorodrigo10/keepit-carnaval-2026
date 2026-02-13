@@ -1,6 +1,6 @@
 // Parade schedule data for Carnaval 2026 - Anhembi
 // Source: Liga das Escolas de Samba (official schedule)
-// Event dates: February 17-18, 2026
+// Event dates: February 13-15, 2026
 
 export interface SambaSchool {
   id: string;
@@ -233,14 +233,14 @@ const findSchool = (id: string): SambaSchool => {
   return school;
 };
 
-// Parade schedule for February 17-18, 2026
+// Parade schedule for February 13-15, 2026
 // Times are approximate and follow typical Anhembi schedule
 export const paradeSchedule: ParadeEntry[] = [
-  // Day 1 - February 17, 2026 (Tuesday)
+  // Day 1 - February 13, 2026 (Friday)
   {
     id: "d1-1",
     school: findSchool("colorado-do-bras"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "21:30",
     estimatedDuration: 65,
     order: 1,
@@ -249,7 +249,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-2",
     school: findSchool("dragoes-da-real"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "22:45",
     estimatedDuration: 65,
     order: 2,
@@ -258,7 +258,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-3",
     school: findSchool("tom-maior"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "00:00",
     estimatedDuration: 65,
     order: 3,
@@ -267,7 +267,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-4",
     school: findSchool("perola-negra"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "01:15",
     estimatedDuration: 65,
     order: 4,
@@ -276,7 +276,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-5",
     school: findSchool("rosas-de-ouro"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "02:30",
     estimatedDuration: 65,
     order: 5,
@@ -285,7 +285,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-6",
     school: findSchool("x9-paulistana"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "03:45",
     estimatedDuration: 65,
     order: 6,
@@ -294,18 +294,18 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d1-7",
     school: findSchool("imperio-de-casa-verde"),
-    date: "2026-02-17",
+    date: "2026-02-13",
     startTime: "05:00",
     estimatedDuration: 65,
     order: 7,
     group: "especial",
   },
 
-  // Day 2 - February 18, 2026 (Wednesday)
+  // Day 2 - February 14, 2026 (Saturday)
   {
     id: "d2-1",
     school: findSchool("camisa-verde-branco"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "21:30",
     estimatedDuration: 65,
     order: 1,
@@ -314,7 +314,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-2",
     school: findSchool("nene-de-vila-matilde"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "22:45",
     estimatedDuration: 65,
     order: 2,
@@ -323,7 +323,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-3",
     school: findSchool("mancha-verde"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "00:00",
     estimatedDuration: 65,
     order: 3,
@@ -332,7 +332,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-4",
     school: findSchool("aguia-ouro"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "01:15",
     estimatedDuration: 65,
     order: 4,
@@ -341,7 +341,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-5",
     school: findSchool("gavioes"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "02:30",
     estimatedDuration: 65,
     order: 5,
@@ -350,7 +350,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-6",
     school: findSchool("mocidade"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "03:45",
     estimatedDuration: 65,
     order: 6,
@@ -359,7 +359,7 @@ export const paradeSchedule: ParadeEntry[] = [
   {
     id: "d2-7",
     school: findSchool("vai-vai"),
-    date: "2026-02-18",
+    date: "2026-02-14",
     startTime: "05:00",
     estimatedDuration: 65,
     order: 7,
@@ -423,6 +423,7 @@ export function formatDate(dateStr: string): string {
 }
 
 export const EVENT_DATES = {
-  day1: "2026-02-17",
-  day2: "2026-02-18",
+  day1: "2026-02-13",
+  day2: "2026-02-14",
+  day3: "2026-02-15",
 };

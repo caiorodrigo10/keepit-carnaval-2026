@@ -51,18 +51,22 @@ function calculateCountdown(targetDate: Date): CountdownTime {
 function getDefaultTab(): string {
   const now = new Date();
   const day1 = new Date(EVENT_DATES.day1 + "T21:30:00");
-  const day2End = new Date(EVENT_DATES.day2 + "T06:30:00");
-  day2End.setDate(day2End.getDate() + 1);
+  const day3End = new Date(EVENT_DATES.day3 + "T06:30:00");
+  day3End.setDate(day3End.getDate() + 1);
 
-  // If we're past day 1 start but before day 2 ends (considering overnight parades)
   if (now >= day1) {
     const day1End = new Date(EVENT_DATES.day1 + "T06:30:00");
     day1End.setDate(day1End.getDate() + 1);
+    const day2End = new Date(EVENT_DATES.day2 + "T06:30:00");
+    day2End.setDate(day2End.getDate() + 1);
 
     if (now < day1End) {
       return EVENT_DATES.day1;
     }
-    return EVENT_DATES.day2;
+    if (now < day2End) {
+      return EVENT_DATES.day2;
+    }
+    return EVENT_DATES.day3;
   }
 
   return EVENT_DATES.day1;
@@ -259,6 +263,7 @@ export default function ProgramacaoPage() {
 
   const day1Parades = getParadesByDate(EVENT_DATES.day1);
   const day2Parades = getParadesByDate(EVENT_DATES.day2);
+  const day3Parades = getParadesByDate(EVENT_DATES.day3);
 
   const formatDateLabel = (date: string) => {
     const d = new Date(date + "T12:00:00");
@@ -315,7 +320,7 @@ export default function ProgramacaoPage() {
                     Aguarde a programacao do Carnaval 2026
                   </h3>
                   <p className="text-muted-foreground mt-2">
-                    17 e 18 de Fevereiro no Sambodromo do Anhembi
+                    13, 14 e 15 de Fevereiro no Sambódromo do Anhembi
                   </p>
                 </div>
               )}
@@ -335,7 +340,7 @@ export default function ProgramacaoPage() {
               className="flex-1 data-[state=active]:bg-keepit-dark data-[state=active]:text-white"
             >
               <Calendar className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Terca, </span>
+              <span className="hidden sm:inline">Sexta, </span>
               {formatDateLabel(EVENT_DATES.day1)}
             </TabsTrigger>
             <TabsTrigger
@@ -343,8 +348,16 @@ export default function ProgramacaoPage() {
               className="flex-1 data-[state=active]:bg-keepit-dark data-[state=active]:text-white"
             >
               <Calendar className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Quarta, </span>
+              <span className="hidden sm:inline">Sábado, </span>
               {formatDateLabel(EVENT_DATES.day2)}
+            </TabsTrigger>
+            <TabsTrigger
+              value={EVENT_DATES.day3}
+              className="flex-1 data-[state=active]:bg-keepit-dark data-[state=active]:text-white"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Domingo, </span>
+              {formatDateLabel(EVENT_DATES.day3)}
             </TabsTrigger>
           </TabsList>
 
@@ -380,6 +393,27 @@ export default function ProgramacaoPage() {
                 className="space-y-3"
               >
                 {day2Parades.map((parade, index) => (
+                  <ParadeCard
+                    key={parade.id}
+                    parade={parade}
+                    isNext={nextParade?.id === parade.id}
+                    isCurrent={currentParade?.id === parade.id}
+                    index={index}
+                  />
+                ))}
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value={EVENT_DATES.day3} className="mt-0">
+              <motion.div
+                key="day3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3"
+              >
+                {day3Parades.map((parade, index) => (
                   <ParadeCard
                     key={parade.id}
                     parade={parade}
