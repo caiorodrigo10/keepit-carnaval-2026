@@ -63,6 +63,17 @@ const featureCards = [
     tint: "card-tint-orange",
   },
   {
+    id: "loja",
+    icon: Store,
+    title: "Loja Keepit",
+    description: "Confira os produtos exclusivos Keepit para o Carnaval!",
+    href: "https://loja.globalkeepit.com",
+    color: "text-keepit-brand",
+    bgColor: "bg-keepit-brand/15",
+    tint: "card-tint-green",
+    external: true,
+  },
+  {
     id: "mural",
     icon: Camera,
     title: "Mural de Fotos",
@@ -177,7 +188,11 @@ export default function HubPage() {
               <motion.div
                 key={feature.id}
                 variants={itemVariants}
-                onClick={() => router.push(feature.href)}
+                onClick={() =>
+                  "external" in feature && feature.external
+                    ? window.open(feature.href, "_blank")
+                    : router.push(feature.href)
+                }
                 className={`card-keepit ${feature.tint} cursor-pointer group p-8 md:p-10 flex flex-col relative overflow-hidden`}
               >
                 {/* Icon */}
