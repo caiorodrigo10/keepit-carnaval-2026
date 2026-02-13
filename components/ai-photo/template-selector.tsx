@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { TemplatesResponse } from "@/types/ai-photo";
@@ -89,36 +88,41 @@ export function TemplateSelector({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        className="grid grid-cols-1 gap-4"
       >
-        {templates.map((template) => (
-          <motion.div key={template.id} variants={itemVariants}>
-            <Card
+        {templates.map((template) => {
+          const isSelected = selectedId === template.id;
+          return (
+            <motion.div
+              key={template.id}
+              variants={itemVariants}
               className={cn(
-                "overflow-hidden cursor-pointer transition-all duration-300 group rounded-2xl",
-                selectedId === template.id
-                  ? "border-keepit-brand shadow-[0_0_15px_rgba(52,191,88,0.3)] scale-[1.02]"
-                  : "border-[rgba(0,0,0,0.03)] hover:border-keepit-brand/50 hover:shadow-md"
+                "relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 group",
+                isSelected
+                  ? "ring-3 ring-keepit-dark shadow-lg"
+                  : "ring-1 ring-black/5 hover:ring-black/15 hover:shadow-md"
               )}
               onClick={() => onSelect(template)}
             >
-              <div className="relative bg-muted overflow-hidden">
+              <div className="relative aspect-[16/10] bg-muted">
                 <img
                   src={template.preview_url}
                   alt={template.name}
-                  className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                   loading="lazy"
                 />
-                {selectedId === template.id && (
-                  <div className="absolute inset-0 bg-keepit-brand/10 border-2 border-keepit-brand rounded-t-2xl" />
-                )}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                  <h3 className="font-black text-sm text-white tracking-tight">{template.name}</h3>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 pt-12">
+                  <h3 className="font-black text-white tracking-tight">{template.name}</h3>
                 </div>
+                {isSelected && (
+                  <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-keepit-dark flex items-center justify-center shadow-md">
+                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                  </div>
+                )}
               </div>
-            </Card>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* Fixed bottom CTA */}
