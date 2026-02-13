@@ -93,32 +93,32 @@ export async function createGeneration(
   const generationId = generation.id;
   const startTime = Date.now();
 
-  // Build identity-preserving prompt using ALL reference photos
-  const refCount = referencePhotos.length;
-  const lastImageIndex = refCount + 1; // template is the last image
-  const refImagesList = refCount === 1
-    ? "image 1"
-    : `images 1 through ${refCount}`;
+  // Use up to 3 reference photos (more can confuse the model)
+  const selectedRefs = referencePhotos.slice(0, 3);
+  const refCount = selectedRefs.length;
+  const lastIdx = refCount + 1; // template is the last image in the array
 
+  // Prompt strategy: describe the DESIRED OUTPUT (a natural photo of this person),
+  // NOT the technical process (face swap/paste). This avoids collage artifacts.
   const prompt = [
-    `CRITICAL: This is a face identity transfer task. The EXACT same person from ${refImagesList} must appear in image ${lastImageIndex}.`,
-    `The generated face MUST be a perfect match — same bone structure, same eyes, same nose shape, same lips, same skin tone, same facial proportions, same ethnicity.`,
-    `Do NOT generate a similar-looking person. The face must be IDENTICAL and recognizable as the same individual.`,
-    `Use ALL ${refCount} reference photo(s) to accurately capture every facial detail: wrinkles, moles, freckles, jawline, eyebrow shape, hairline.`,
-    `Place this exact person into the pose, outfit, and scene from image ${lastImageIndex}. Keep the background, lighting, and composition from image ${lastImageIndex}.`,
-    `The result should look like a real photograph of THIS specific person in that scene.`,
+    `Generate a professional, photorealistic photograph of the person shown in ${refCount === 1 ? "image 1" : `images 1-${refCount}`}.`,
+    `The person must be placed into the scene, pose, outfit, and setting from image ${lastIdx}.`,
+    `This must look like a real photo taken of this specific person — not a composite or collage.`,
+    `The entire body, skin tone, and complexion must be consistent and naturally belong to the same person from the reference photos.`,
+    `Match the lighting, shadows, and color grading of image ${lastIdx} so everything blends seamlessly.`,
+    `The final image should be indistinguishable from a real photograph.`,
   ].join(" ");
 
   console.log("[generate] Starting generation:", generationId);
   console.log("[generate] Template:", template.slug, "| Template image:", template.template_image_url);
-  console.log("[generate] Reference photos:", referencePhotos.length, "(sending ALL)");
+  console.log("[generate] Reference photos:", selectedRefs.length, "of", referencePhotos.length);
   console.log("[generate] Prompt:", prompt);
 
-  // 2. Generate via Kie.ai (nano-banana-pro) — send ALL reference photos
+  // 2. Generate via Kie.ai (nano-banana-pro)
   try {
     console.log("[generate] Calling Kie.ai nano-banana-pro...");
     const imageBuffer = await generateImage({
-      referencePhotoUrls: referencePhotos,
+      referencePhotoUrls: selectedRefs,
       templateImageUrl: template.template_image_url,
       prompt,
     });
