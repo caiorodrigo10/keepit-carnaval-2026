@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { generateImage } from "./kie-client";
 import { saveGeneratedImage } from "./storage";
+import { applyWatermark } from "./watermark";
 import { AI_PHOTO_LIMITS } from "@/types/ai-photo";
 import type { AiPhotoTemplate, AiPhotoGeneration } from "@/types/ai-photo";
 
@@ -123,9 +124,21 @@ export async function createGeneration(
       prompt,
     });
 
-    console.log(`[generate] Image received, size: ${imageBuffer.length} bytes. Saving...`);
-    const storedUrl = await saveGeneratedImage(imageBuffer, generationId, 1);
-    console.log(`[generate] Saved to ${storedUrl}`);
+    console.log(`[generate] Image received, size: ${imageBuffer.length} bytes. Saving original...`);
+
+    // Save original first (fallback seguro)
+    let storedUrl = await saveGeneratedImage(imageBuffer, generationId, 1);
+    console.log(`[generate] Original saved to ${storedUrl}`);
+
+    // Apply watermark on a COPY of the buffer (separate sharp instances)
+    try {
+      const watermarkedBuffer = await applyWatermark(Buffer.from(imageBuffer));
+      console.log(`[generate] Watermark applied, size: ${watermarkedBuffer.length} bytes. Replacing...`);
+      storedUrl = await saveGeneratedImage(watermarkedBuffer, generationId, 1);
+      console.log(`[generate] Watermarked version saved to ${storedUrl}`);
+    } catch (wmError) {
+      console.warn("[generate] Watermark failed, keeping original:", wmError);
+    }
 
     const processingTime = Date.now() - startTime;
     console.log(`[generate] Done. time=${processingTime}ms`);
