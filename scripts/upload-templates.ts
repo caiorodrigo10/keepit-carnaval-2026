@@ -22,6 +22,14 @@ const TEMPLATES = [
   { slug: "rainha-close", file: "keepittemplate3.jpg" },
   { slug: "musa-carnaval", file: "keepittemplate4.jpg" },
   { slug: "musa-close", file: "keepittemplate5.jpg" },
+  { slug: "plumas-coloridas", file: "keepittemplate6.jpg" },
+  { slug: "cocar-dourado", file: "keepittemplate7.jpg" },
+  { slug: "diva-azul-dourado", file: "keepittemplate8.jpg" },
+  { slug: "princesa-apoteose", file: "keepittemplate9.jpg" },
+  { slug: "passista-azul", file: "keepittemplate10.jpg" },
+  { slug: "foliao-sp", file: "keepittemplate11.jpg" },
+  { slug: "foliao-padrao", file: "keepittemplate12.jpg" },
+  { slug: "guerreiro-indigena", file: "keepittemplate13.jpg" },
 ];
 
 async function main() {
@@ -35,7 +43,7 @@ async function main() {
     const { error: uploadError } = await supabase.storage
       .from("ai-photos")
       .upload(storagePath, buffer, {
-        contentType: "image/jpeg",
+        contentType: t.file.endsWith(".png") ? "image/png" : "image/jpeg",
         upsert: true,
       });
 

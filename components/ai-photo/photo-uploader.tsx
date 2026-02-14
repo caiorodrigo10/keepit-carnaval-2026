@@ -48,8 +48,8 @@ export function PhotoUploader({
   onGenerate,
   onBack,
 }: PhotoUploaderProps) {
-  const galleryInputId = useRef(`gallery-${Math.random().toString(36).slice(2, 7)}`).current;
-  const cameraInputId = useRef(`camera-${Math.random().toString(36).slice(2, 7)}`).current;
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const minPhotos = AI_PHOTO_LIMITS.MIN_REFERENCE_PHOTOS;
   const maxPhotos = AI_PHOTO_LIMITS.MAX_REFERENCE_PHOTOS;
@@ -66,23 +66,24 @@ export function PhotoUploader({
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Visually hidden file inputs (sr-only keeps them in layout for label association) */}
+      {/* Hidden file inputs — triggered programmatically via ref.click() for
+          maximum mobile compatibility (label+htmlFor breaks on iOS Safari) */}
       <input
-        id={galleryInputId}
+        ref={galleryRef}
         type="file"
         accept="image/*"
         multiple
         onChange={handleInputChange}
-        className="sr-only"
+        className="hidden"
         disabled={isUploading}
       />
       <input
-        id={cameraInputId}
+        ref={cameraRef}
         type="file"
         accept="image/*"
         capture="environment"
         onChange={handleInputChange}
-        className="sr-only"
+        className="hidden"
         disabled={isUploading}
       />
 
@@ -145,20 +146,22 @@ export function PhotoUploader({
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <label
-                  htmlFor={cameraInputId}
+                <button
+                  type="button"
+                  onClick={() => cameraRef.current?.click()}
                   className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold cursor-pointer bg-keepit-dark text-white hover:bg-black transition-colors"
                 >
                   <Camera className="w-5 h-5" />
                   Camera
-                </label>
-                <label
-                  htmlFor={galleryInputId}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => galleryRef.current?.click()}
                   className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
                 >
                   <Upload className="w-5 h-5" />
                   Galeria
-                </label>
+                </button>
               </div>
             </div>
         </div>
@@ -212,15 +215,16 @@ export function PhotoUploader({
 
           {/* Add more button */}
           {canAddMore && !isUploading && (
-            <motion.label
-              htmlFor={galleryInputId}
+            <motion.button
+              type="button"
+              onClick={() => galleryRef.current?.click()}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="aspect-square rounded-2xl border-2 border-dashed border-keepit-dark/10 flex flex-col items-center justify-center gap-1 hover:bg-keepit-dark/5 transition-colors cursor-pointer"
             >
               <Plus className="w-6 h-6 text-keepit-dark/40" />
               <span className="text-[10px] text-keepit-dark/40">Adicionar</span>
-            </motion.label>
+            </motion.button>
           )}
         </div>
       )}
@@ -241,20 +245,22 @@ export function PhotoUploader({
         <div className="max-w-lg mx-auto space-y-2">
           {files.length > 0 && canAddMore && !isUploading && (
             <div className="flex gap-2">
-              <label
-                htmlFor={cameraInputId}
+              <button
+                type="button"
+                onClick={() => cameraRef.current?.click()}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
               >
                 <Camera className="w-4 h-4" />
                 Camera
-              </label>
-              <label
-                htmlFor={galleryInputId}
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
               >
                 <Upload className="w-4 h-4" />
                 Galeria
-              </label>
+              </button>
             </div>
           )}
           <Button

@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
-  Camera,
-  MapPin,
-  Calendar,
   Sparkles,
-  Upload,
   Gift,
   ArrowRight,
   Store,
   Wand2,
+  Trophy,
+  X,
+  Camera,
+  MapPin,
+  Calendar,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
@@ -53,68 +55,29 @@ const itemVariants = {
 /* ------------------------------------------------------------------ */
 /*  Feature cards data                                                 */
 /* ------------------------------------------------------------------ */
+const lojaProducts = [
+  { src: "https://loja.globalkeepit.com/images/products/pedras-rosto.webp", name: "Pedras Hype Glow" },
+  { src: "https://loja.globalkeepit.com/images/products/lip-balm-morango.avif", name: "Lip Balm Morango" },
+  { src: "https://loja.globalkeepit.com/images/products/lip-balm-melancia.jpg", name: "Lip Balm Melancia" },
+  { src: "https://loja.globalkeepit.com/images/products/preservativo-combo.webp", name: "Combo c/ Óculos" },
+  { src: "https://loja.globalkeepit.com/images/products/rexona-masc.webp", name: "Rexona Clinical" },
+  { src: "https://loja.globalkeepit.com/images/products/go-energy.webp", name: "GO! Energy Gel" },
+  { src: "https://loja.globalkeepit.com/images/products/alcool-gel.webp", name: "Álcool Gel" },
+  { src: "https://loja.globalkeepit.com/images/products/epocler.jpeg", name: "Epocler" },
+];
+
 const featureCards = [
-  {
-    id: "loja",
-    icon: Store,
-    title: "Loja Keepit",
-    description: "Confira os produtos exclusivos Keepit para o Carnaval!",
-    href: "https://loja.globalkeepit.com",
-    color: "text-keepit-brand",
-    bgColor: "bg-keepit-brand/15",
-    tint: "card-tint-green",
-    external: true,
-  },
-  {
-    id: "mural",
-    icon: Camera,
-    title: "Mural de Fotos",
-    description: "Veja todas as fotos do evento e apareça no telão!",
-    href: "/mural",
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/15",
-    tint: "card-tint-orange",
-  },
-  {
-    id: "mapa",
-    icon: MapPin,
-    title: "Mapa Interativo",
-    description: "Encontre palcos, banheiros e a área Keepit.",
-    href: "/mapa",
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/15",
-    tint: "card-tint-blue",
-  },
-  {
-    id: "programacao",
-    icon: Calendar,
-    title: "Programação",
-    description: "Horários dos desfiles e atrações do evento.",
-    href: "/programacao",
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-500/15",
-    tint: "card-tint-indigo",
-  },
   {
     id: "sorteio",
     icon: Sparkles,
     title: "Sorteios",
-    description: "Acompanhe sua participação nos sorteios exclusivos!",
-    href: "/sorteio",
+    description: "Você está concorrendo a um ingresso para o Camarote do Desfile das Campeãs!",
+    href: "#sorteio",
     color: "text-yellow-500",
     bgColor: "bg-yellow-500/15",
     tint: "card-tint-yellow",
   },
-  {
-    id: "upload",
-    icon: Upload,
-    title: "Enviar Foto",
-    description: "Envie sua foto e apareça no mural e no telão!",
-    href: "/upload",
-    color: "text-pink-500",
-    bgColor: "bg-pink-500/15",
-    tint: "card-tint-pink",
-  },
+  // TODO: reativar quando prontos — mural, mapa, programacao, upload
 ];
 
 /* ------------------------------------------------------------------ */
@@ -124,6 +87,24 @@ export default function HubPage() {
   const router = useRouter();
   const [leadData, setLeadData] = useState<StoredLead | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [showSorteio, setShowSorteio] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll product carousel (needs isReady so it runs after skeleton is replaced)
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let scrollPos = 0;
+    const speed = 0.5;
+    const interval = setInterval(() => {
+      scrollPos += speed;
+      if (scrollPos >= el.scrollWidth - el.clientWidth) {
+        scrollPos = 0;
+      }
+      el.scrollLeft = scrollPos;
+    }, 30);
+    return () => clearInterval(interval);
+  }, [isReady]);
 
   useEffect(() => {
     const lead = getStoredLead();
@@ -148,7 +129,7 @@ export default function HubPage() {
 
       {/* ---- Welcome Section ---- */}
       <section className="section-white">
-        <div className="max-w-6xl mx-auto px-5 pt-10 pb-6 md:px-6 md:pt-20 md:pb-16">
+        <div className="max-w-6xl mx-auto px-5 pt-10 pb-8 md:px-6 md:pt-20 md:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -165,8 +146,10 @@ export default function HubPage() {
         </div>
       </section>
 
-      {/* ---- AI Photo Highlight ---- */}
-      <section className="max-w-6xl mx-auto px-4 pt-2 pb-4 md:px-6 md:pt-4 md:pb-8">
+      {/* ---- Cards Section ---- */}
+      <section className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-12 space-y-5 md:space-y-8">
+
+        {/* AI Photo Highlight */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -175,11 +158,11 @@ export default function HubPage() {
           onClick={() => router.push("/hub/ai-photo")}
           className="card-keepit card-tint-purple cursor-pointer group relative overflow-hidden rounded-3xl"
         >
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 p-5 md:p-10">
+          <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8 p-6 md:p-10">
             {/* Template preview */}
             <div className="relative w-full md:w-56 h-48 md:h-56 rounded-2xl overflow-hidden shrink-0">
               <Image
-                src="/modeloskeepit/keepittemplate1.jpg"
+                src="/modeloskeepit/keepittemplate3.jpg"
                 alt="Exemplo de foto com IA"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -209,16 +192,70 @@ export default function HubPage() {
             </div>
           </div>
         </motion.div>
-      </section>
 
-      {/* ---- Feature Cards Grid ---- */}
-      <section className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-16">
+        {/* Loja Keepit */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: ENTRANCE_DURATION, ease: ENTRANCE_EASE }}
+          className="card-keepit card-tint-green overflow-hidden rounded-3xl p-6 md:p-10"
+        >
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-keepit-brand/15 flex items-center justify-center">
+              <Store className="h-5 w-5 md:h-6 md:w-6 text-keepit-brand" />
+            </div>
+            <div>
+              <h2 className="text-xl md:text-2xl font-black tracking-tight text-keepit-dark">
+                Loja Keepit
+              </h2>
+              <p className="text-xs md:text-sm text-keepit-dark/60">
+                Produtos essenciais para o Carnaval
+              </p>
+            </div>
+          </div>
+
+          {/* Product carousel */}
+          <div
+            ref={scrollRef}
+            className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 py-2"
+          >
+            {lojaProducts.map((product) => (
+              <div
+                key={product.name}
+                className="shrink-0 w-28 md:w-36"
+              >
+                <div className="bg-white rounded-2xl p-2 shadow-sm aspect-square flex items-center justify-center mb-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={product.src}
+                    alt={product.name}
+                    className="w-full h-full object-contain rounded-xl"
+                  />
+                </div>
+                <p className="text-xs text-keepit-dark/70 text-center font-medium truncate">
+                  {product.name}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            onClick={() => window.open("https://loja.globalkeepit.com", "_blank")}
+            className="btn-pill btn-pill-primary inline-flex items-center gap-2 mt-5 mb-1"
+          >
+            Ver produtos
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </motion.div>
+
+        {/* Feature Cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6"
         >
           {featureCards.map((feature) => {
             const IconComponent = feature.icon;
@@ -226,12 +263,16 @@ export default function HubPage() {
               <motion.div
                 key={feature.id}
                 variants={itemVariants}
-                onClick={() =>
-                  "external" in feature && feature.external
-                    ? window.open(feature.href, "_blank")
-                    : router.push(feature.href)
-                }
-                className={`card-keepit ${feature.tint} cursor-pointer group p-4 md:p-10 flex flex-col relative overflow-hidden`}
+                onClick={() => {
+                  if (feature.id === "sorteio") {
+                    setShowSorteio(true);
+                  } else if ("external" in feature && feature.external) {
+                    window.open(feature.href, "_blank");
+                  } else {
+                    router.push(feature.href);
+                  }
+                }}
+                className={`card-keepit ${feature.tint} cursor-pointer group p-6 md:p-10 flex flex-col relative overflow-hidden`}
               >
                 {/* Icon */}
                 <div
@@ -258,6 +299,7 @@ export default function HubPage() {
             );
           })}
         </motion.div>
+
       </section>
 
       {/* ---- Keepit Franchise CTA ---- */}
@@ -296,8 +338,50 @@ export default function HubPage() {
         </div>
       </section>
 
+      {/* ---- Sorteio Modal ---- */}
+      {showSorteio && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card-keepit p-6 md:p-10 max-w-md w-full relative"
+          >
+            <button
+              onClick={() => setShowSorteio(false)}
+              className="absolute top-4 right-4 text-keepit-dark/40 hover:text-keepit-dark"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-14 w-14 rounded-2xl bg-yellow-500/15 flex items-center justify-center mb-4">
+                <Trophy className="h-7 w-7 text-yellow-500" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-black tracking-tight text-keepit-dark mb-2">
+                Você está concorrendo!
+              </h3>
+              <p className="text-keepit-dark/60 text-sm md:text-base mb-4">
+                Ao se cadastrar, você já está automaticamente concorrendo a um
+                <strong className="text-keepit-dark"> ingresso para o Camarote do Desfile das Campeãs</strong>.
+                Boa sorte!
+              </p>
+              <p className="text-xs text-keepit-dark/40">
+                O sorteio será realizado após o evento. O vencedor será notificado por e-mail e telefone.
+              </p>
+              <Button
+                onClick={() => setShowSorteio(false)}
+                className="btn-pill btn-pill-primary mt-6"
+              >
+                Entendi!
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* ---- Bottom spacer (replaces fixed footer) ---- */}
       <div className="h-4" />
+      {/* Hidden: Turbopack requires these icons in module graph */}
+      <span className="sr-only" aria-hidden="true"><Camera /><MapPin /><Calendar /><Upload /></span>
     </div>
   );
 }
