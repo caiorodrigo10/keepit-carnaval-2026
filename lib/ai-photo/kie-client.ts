@@ -67,6 +67,8 @@ export async function generateImage(input: {
   referencePhotoUrls: string[];
   templateImageUrl: string;
   prompt: string;
+  aspectRatio?: string;
+  resolution?: string;
 }): Promise<Buffer> {
   const apiKey = getApiKey();
 
@@ -96,6 +98,8 @@ export async function generateImage(input: {
       input: {
         prompt: input.prompt,
         image_input: imageInput,
+        ...(input.aspectRatio && { aspect_ratio: input.aspectRatio }),
+        ...(input.resolution && { resolution: input.resolution }),
       },
     }),
   });
@@ -192,6 +196,83 @@ export async function generateImage(input: {
   }
 
   throw new Error("Kie.ai generation timed out after 120 seconds");
+}
+
+/**
+ * Analyze reference photos using Gemini 2.5 Flash (vision) via Kie.ai.
+ * Extracts a physical description of the person: gender, skin tone, age, body type.
+ * Used to build personalized prompts for nano-banana-pro generation.
+ */
+export async function analyzeReferencePhotos(
+  referencePhotoUrls: string[]
+): Promise<string> {
+  const apiKey = getApiKey();
+
+  const imageMessages = referencePhotoUrls.map((url) => ({
+    type: "image_url" as const,
+    image_url: { url },
+  }));
+
+  const body = {
+    model: "gemini-2.5-flash",
+    messages: [
+      {
+        role: "user",
+        content: [
+          ...imageMessages,
+          {
+            type: "text" as const,
+            text: [
+              "Analyze the person in these photos and provide a concise physical description.",
+              "Return ONLY a single paragraph with these attributes:",
+              "- Gender (male/female)",
+              "- Approximate age range (young adult, middle-aged, elderly)",
+              "- Skin tone (very light, light, medium, olive, brown, dark brown, very dark)",
+              "- Body build (slim, average, athletic, stocky, heavy)",
+              "- Hair (color, length, style)",
+              "- Any distinctive features",
+              "",
+              "Format: '[gender], [age range], [skin tone] skin, [build] build, [hair description]. [distinctive features if any].'",
+              "Example: 'Female, young adult, dark brown skin, slim build, long black curly hair. Has a small nose piercing.'",
+              "Example: 'Male, middle-aged, light skin, stocky build, short brown hair with beard.'",
+              "",
+              "Be precise about skin tone — this is critical for accurate image generation.",
+              "Respond ONLY with the description, no preamble or explanation.",
+            ].join("\n"),
+          },
+        ],
+      },
+    ],
+    max_tokens: 200,
+  };
+
+  console.log("[kie-vision] Analyzing", referencePhotoUrls.length, "reference photos with Gemini 2.5 Flash...");
+
+  const res = await fetch("https://api.kie.ai/gemini-2.5-flash/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("[kie-vision] HTTP error:", res.status, text);
+    throw new Error(`Gemini 2.5 Flash API error (${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+  const description = data.choices?.[0]?.message?.content?.trim();
+
+  if (!description) {
+    console.error("[kie-vision] No description returned:", JSON.stringify(data));
+    throw new Error("Gemini 2.5 Flash returned no description");
+  }
+
+  console.log("[kie-vision] Person description:", description);
+  return description;
 }
 
 function sleep(ms: number): Promise<void> {

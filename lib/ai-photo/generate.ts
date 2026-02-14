@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/service";
-import { generateImage } from "./kie-client";
+import { generateImage, analyzeReferencePhotos } from "./kie-client";
 import { saveGeneratedImage } from "./storage";
 import { applyWatermark } from "./watermark";
 import { AI_PHOTO_LIMITS } from "@/types/ai-photo";
@@ -94,21 +94,49 @@ export async function createGeneration(
   const generationId = generation.id;
   const startTime = Date.now();
 
-  // Use up to 3 reference photos (more can confuse the model)
-  const selectedRefs = referencePhotos.slice(0, 3);
+  // Use up to 5 reference photos for better facial fidelity (model supports up to 5 for humans)
+  const selectedRefs = referencePhotos.slice(0, 5);
   const refCount = selectedRefs.length;
+  const refRange = refCount === 1 ? "image 1" : `images 1-${refCount}`;
   const lastIdx = refCount + 1; // template is the last image in the array
 
-  // Prompt strategy: describe the DESIRED OUTPUT (a natural photo of this person),
-  // NOT the technical process (face swap/paste). This avoids collage artifacts.
-  const prompt = [
-    `Generate a professional, photorealistic photograph of the person shown in ${refCount === 1 ? "image 1" : `images 1-${refCount}`}.`,
-    `The person must be placed into the scene, pose, outfit, and setting from image ${lastIdx}.`,
-    `This must look like a real photo taken of this specific person — not a composite or collage.`,
-    `The entire body, skin tone, and complexion must be consistent and naturally belong to the same person from the reference photos.`,
-    `Match the lighting, shadows, and color grading of image ${lastIdx} so everything blends seamlessly.`,
-    `The final image should be indistinguishable from a real photograph.`,
-  ].join(" ");
+  // V10: Pre-analyze ALL templates with Gemini 2.5 Flash for personalized prompts.
+  // BACKUP V5 saved in PESQUISA-NANO-BANANA-PRO.md
+  let personDescription = "";
+  try {
+    personDescription = await analyzeReferencePhotos(selectedRefs);
+    console.log("[generate] Pre-analysis result:", personDescription);
+  } catch (analysisError) {
+    console.warn("[generate] Pre-analysis failed, using generic prompt:", analysisError);
+  }
+
+  let prompt: string;
+
+  if (personDescription) {
+    prompt = [
+      `Replace the person in image ${lastIdx} with the person from ${refRange}.`,
+      `The person from the reference is: ${personDescription}`,
+      `The ENTIRE body must match this description — skin tone, gender, body build, age, and all physical traits must be uniform from head to toe.`,
+      `Every visible body part (face, neck, arms, hands, legs, chest) must have the exact same skin tone described above.`,
+      `Keep the same clothes, accessories, pose, and background from image ${lastIdx}.`,
+      `Do NOT keep any physical traits from the original person in image ${lastIdx}.`,
+      `Preserve 100% of the facial features from ${refRange}: exact face shape, eye color, skin texture, and all distinctive marks.`,
+      `Natural skin texture with visible pores — not airbrushed or plastic.`,
+      `Seamlessly blend into the scene: match lighting, shadows, and color temperature from image ${lastIdx}.`,
+      `Photorealistic 8K quality, 85mm lens at f/1.8, three-point lighting.`,
+    ].join(" ");
+  } else {
+    // Fallback without pre-analysis
+    prompt = [
+      `Replace the person in image ${lastIdx} with the person from ${refRange}.`,
+      `Adapt the body structure, skin color, gender, and build to match the person from ${refRange}.`,
+      `The skin tone must be uniform across the entire body — face, arms, hands, neck, and all visible parts must match.`,
+      `Keep the same clothes, accessories, pose, and background from image ${lastIdx}.`,
+      `Do NOT keep any physical traits from the original person in image ${lastIdx}.`,
+      `Preserve 100% of the facial features from ${refRange}.`,
+      `Natural skin texture with visible pores. Photorealistic 8K quality, 85mm lens at f/1.8.`,
+    ].join(" ");
+  }
 
   console.log("[generate] Starting generation:", generationId);
   console.log("[generate] Template:", template.slug, "| Template image:", template.template_image_url);
@@ -122,6 +150,8 @@ export async function createGeneration(
       referencePhotoUrls: selectedRefs,
       templateImageUrl: template.template_image_url,
       prompt,
+      aspectRatio: template.aspect_ratio,
+      resolution: template.resolution || "2K",
     });
 
     console.log(`[generate] Image received, size: ${imageBuffer.length} bytes. Saving original...`);
