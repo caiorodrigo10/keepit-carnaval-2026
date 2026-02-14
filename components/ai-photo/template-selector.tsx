@@ -104,7 +104,7 @@ export function TemplateSelector({
               )}
               onClick={() => onSelect(template)}
             >
-              <div className="relative aspect-[16/10] bg-muted">
+              <div className="relative aspect-[3/2] bg-muted">
                 <img
                   src={template.preview_url}
                   alt={template.name}
