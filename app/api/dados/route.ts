@@ -38,41 +38,41 @@ export async function POST(req: NextRequest) {
     .select("*", { count: "exact", head: true })
     .eq("status", "failed");
 
-  // Orders
-  const { count: totalOrders } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true });
-
-  const { count: pendingOrders } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "pending");
-
-  const { count: confirmedOrders } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "confirmed");
-
-  const { data: ordersRecent } = await supabase
-    .from("orders")
-    .select("customer_name, customer_email, customer_phone, total, status, created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  // Orders (table not in generated types, use rpc/fetch workaround)
+  const ordersRes = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/orders?select=customer_name,customer_email,customer_phone,total,status,created_at&order=created_at.desc&limit=50`,
+    {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        Prefer: "count=exact",
+      },
+    }
+  );
+  const ordersRecent = ordersRes.ok ? await ordersRes.json() : [];
+  const totalOrders = parseInt(ordersRes.headers.get("content-range")?.split("/")[1] || "0");
+  const pendingOrders = ordersRecent.filter((o: { status: string }) => o.status === "pending").length;
+  const confirmedOrders = ordersRecent.filter((o: { status: string }) => o.status === "confirmed").length;
 
   // AI templates usage
-  const { data: templateUsage } = await supabase
+  const { data: templateUsageRaw } = await supabase
     .from("ai_photo_generations")
-    .select("template_id, ai_photo_templates(name)")
+    .select("template_id")
     .eq("status", "completed");
 
-  // Count per template
+  // Get template names
+  const { data: templates } = await supabase
+    .from("ai_photo_templates")
+    .select("id, name");
+
+  const templateMap = new Map((templates ?? []).map((t) => [t.id, t.name]));
+
   const templateCounts: Record<string, { name: string; count: number }> = {};
-  if (templateUsage) {
-    for (const gen of templateUsage) {
+  if (templateUsageRaw) {
+    for (const gen of templateUsageRaw) {
       const tid = gen.template_id;
-      const tname = (gen as unknown as { ai_photo_templates: { name: string } | null }).ai_photo_templates?.name || "Desconhecido";
       if (!templateCounts[tid]) {
-        templateCounts[tid] = { name: tname, count: 0 };
+        templateCounts[tid] = { name: templateMap.get(tid) || "Desconhecido", count: 0 };
       }
       templateCounts[tid].count++;
     }
