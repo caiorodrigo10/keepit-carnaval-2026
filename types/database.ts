@@ -16,7 +16,7 @@ export type PhotoStatus = "pending" | "approved" | "rejected";
 export type PhotoSource = "photographer" | "user";
 export type ModerationAction = "approved" | "rejected" | "blocked";
 export type UserRole = "admin" | "moderator" | "photographer";
-export type LeadOrigin = "qr_code" | "spontaneous" | "traffic";
+export type LeadOrigin = "qr_code" | "spontaneous" | "traffic" | "roleta" | "pesquisa";
 export type ScreenStatus = "online" | "offline" | "paused";
 export type AiGenerationStatus =
   | "uploading"
@@ -372,7 +372,7 @@ export interface Database {
         Row: {
           id: string;
           lead_id: string;
-          template_id: string;
+          template_id: string | null;
           status: AiGenerationStatus;
           reference_photos: string[];
           variant_1_url: string | null;
@@ -392,7 +392,7 @@ export interface Database {
         Insert: {
           id?: string;
           lead_id: string;
-          template_id: string;
+          template_id?: string | null;
           status?: AiGenerationStatus;
           reference_photos?: string[];
           variant_1_url?: string | null;
@@ -446,6 +446,67 @@ export interface Database {
           }
         ];
       };
+      prize_wheel_spins: {
+        Row: {
+          id: string;
+          lead_id: string;
+          prize_slug: string;
+          prize_name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id: string;
+          prize_slug: string;
+          prize_name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string;
+          prize_slug?: string;
+          prize_name?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prize_wheel_spins_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      survey_responses: {
+        Row: {
+          id: string;
+          lead_id: string;
+          answers: Record<string, string | number>;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id: string;
+          answers: Record<string, string | number>;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string;
+          answers?: Record<string, string | number>;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -491,3 +552,4 @@ export type ScreenQueue = Tables<"screen_queue">;
 export type BlockedUser = Tables<"blocked_users">;
 export type AiPhotoTemplate = Tables<"ai_photo_templates">;
 export type AiPhotoGeneration = Tables<"ai_photo_generations">;
+export type SurveyResponse = Tables<"survey_responses">;

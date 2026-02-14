@@ -1,9 +1,8 @@
 import { createServiceClient } from "@/lib/supabase/service";
-import { generateImage, analyzeReferencePhotos } from "./kie-client";
+import { generateImage } from "./kie-client";
 import { saveGeneratedImage } from "./storage";
 import { applyWatermark } from "./watermark";
 import { AI_PHOTO_LIMITS } from "@/types/ai-photo";
-import type { AiPhotoTemplate, AiPhotoGeneration } from "@/types/ai-photo";
 
 /**
  * Check how many generations a lead has (excluding failed ones).
@@ -25,25 +24,9 @@ export async function getLeadGenerationCount(leadId: string): Promise<number> {
  * Check if lead has reached generation limit.
  */
 export async function hasReachedLimit(leadId: string): Promise<boolean> {
+  if (process.env.NODE_ENV === "development") return false;
   const count = await getLeadGenerationCount(leadId);
   return count >= AI_PHOTO_LIMITS.MAX_GENERATIONS_PER_LEAD;
-}
-
-/**
- * Fetch template by ID.
- * Uses service client to bypass RLS (runs in API route context).
- */
-export async function getTemplate(templateId: string): Promise<AiPhotoTemplate | null> {
-  const supabase = createServiceClient();
-
-  const { data } = await supabase
-    .from("ai_photo_templates")
-    .select("*")
-    .eq("id", templateId)
-    .eq("is_active", true)
-    .single();
-
-  return data as AiPhotoTemplate | null;
 }
 
 /**
@@ -63,15 +46,14 @@ export async function leadExists(leadId: string): Promise<boolean> {
 }
 
 /**
- * Create a generation record, generate 1 variant via Kie.ai (nano-banana-pro), and save result.
- * User can regenerate if they want a different result.
+ * V2: Generate a carnival clothing swap from a single user photo.
+ * No templates — just transform the person's clothes into carnival outfit.
  *
  * Returns the generation ID.
  */
 export async function createGeneration(
   leadId: string,
-  template: AiPhotoTemplate,
-  referencePhotos: string[]
+  photoUrl: string
 ): Promise<string> {
   const supabase = createServiceClient();
 
@@ -80,9 +62,9 @@ export async function createGeneration(
     .from("ai_photo_generations")
     .insert({
       lead_id: leadId,
-      template_id: template.id,
+      template_id: null,
       status: "processing",
-      reference_photos: referencePhotos,
+      reference_photos: [photoUrl],
     })
     .select("id")
     .single();
@@ -94,84 +76,47 @@ export async function createGeneration(
   const generationId = generation.id;
   const startTime = Date.now();
 
-  // Use up to 5 reference photos for better facial fidelity (model supports up to 5 for humans)
-  const selectedRefs = referencePhotos.slice(0, 5);
-  const refCount = selectedRefs.length;
-  const refRange = refCount === 1 ? "image 1" : `images 1-${refCount}`;
-  const lastIdx = refCount + 1; // template is the last image in the array
+  // V2 prompt: clothing swap only, preserve everything else
+  const prompt = [
+    "Transform the clothes and outfit of the person in this photo into a vibrant, elaborate Brazilian carnival costume.",
+    "KEEP EXACTLY THE SAME: the person's face, facial features, skin tone, hair, body pose, body proportions, and the background/environment.",
+    "ONLY CHANGE: the clothing and accessories. Replace them with a colorful carnival outfit featuring sequins, feathers, glitter, beads, and traditional Brazilian carnival elements.",
+    "The costume should look festive, glamorous, and appropriate for Rio de Janeiro or São Paulo carnival.",
+    "The result must be photorealistic — the person should look natural wearing the costume, with proper lighting and shadows matching the original photo.",
+    "High quality, 8K resolution.",
+  ].join(" ");
 
-  // V10: Pre-analyze ALL templates with Gemini 2.5 Flash for personalized prompts.
-  // BACKUP V5 saved in PESQUISA-NANO-BANANA-PRO.md
-  let personDescription = "";
+  console.log("[generate-v2] Starting generation:", generationId);
+  console.log("[generate-v2] Photo URL:", photoUrl);
+  console.log("[generate-v2] Prompt:", prompt);
+
+  // 2. Generate via Kie.ai (nano-banana-pro) — single image, no template
   try {
-    personDescription = await analyzeReferencePhotos(selectedRefs);
-    console.log("[generate] Pre-analysis result:", personDescription);
-  } catch (analysisError) {
-    console.warn("[generate] Pre-analysis failed, using generic prompt:", analysisError);
-  }
-
-  let prompt: string;
-
-  if (personDescription) {
-    prompt = [
-      `Replace the person in image ${lastIdx} with the person from ${refRange}.`,
-      `The person from the reference is: ${personDescription}`,
-      `The ENTIRE body must match this description — skin tone, gender, body build, age, and all physical traits must be uniform from head to toe.`,
-      `Every visible body part (face, neck, arms, hands, legs, chest) must have the exact same skin tone described above.`,
-      `Keep the same clothes, accessories, pose, and background from image ${lastIdx}.`,
-      `Do NOT keep any physical traits from the original person in image ${lastIdx}.`,
-      `Preserve 100% of the facial features from ${refRange}: exact face shape, eye color, skin texture, and all distinctive marks.`,
-      `Natural skin texture with visible pores — not airbrushed or plastic.`,
-      `Seamlessly blend into the scene: match lighting, shadows, and color temperature from image ${lastIdx}.`,
-      `Photorealistic 8K quality, 85mm lens at f/1.8, three-point lighting.`,
-    ].join(" ");
-  } else {
-    // Fallback without pre-analysis
-    prompt = [
-      `Replace the person in image ${lastIdx} with the person from ${refRange}.`,
-      `Adapt the body structure, skin color, gender, and build to match the person from ${refRange}.`,
-      `The skin tone must be uniform across the entire body — face, arms, hands, neck, and all visible parts must match.`,
-      `Keep the same clothes, accessories, pose, and background from image ${lastIdx}.`,
-      `Do NOT keep any physical traits from the original person in image ${lastIdx}.`,
-      `Preserve 100% of the facial features from ${refRange}.`,
-      `Natural skin texture with visible pores. Photorealistic 8K quality, 85mm lens at f/1.8.`,
-    ].join(" ");
-  }
-
-  console.log("[generate] Starting generation:", generationId);
-  console.log("[generate] Template:", template.slug, "| Template image:", template.template_image_url);
-  console.log("[generate] Reference photos:", selectedRefs.length, "of", referencePhotos.length);
-  console.log("[generate] Prompt:", prompt);
-
-  // 2. Generate via Kie.ai (nano-banana-pro)
-  try {
-    console.log("[generate] Calling Kie.ai nano-banana-pro...");
+    console.log("[generate-v2] Calling Kie.ai nano-banana-pro...");
     const imageBuffer = await generateImage({
-      referencePhotoUrls: selectedRefs,
-      templateImageUrl: template.template_image_url,
+      imageUrls: [photoUrl],
       prompt,
-      aspectRatio: template.aspect_ratio,
-      resolution: template.resolution || "2K",
+      resolution: "2K",
     });
 
-    console.log(`[generate] Image received, size: ${imageBuffer.length} bytes. Saving original...`);
+    console.log(`[generate-v2] Image received, size: ${imageBuffer.length} bytes. Saving original...`);
 
-    // Save original first (fallback seguro)
+    // Save original first (safe fallback)
     let storedUrl = await saveGeneratedImage(imageBuffer, generationId, 1);
-    console.log(`[generate] Original saved to ${storedUrl}`);
+    console.log(`[generate-v2] Original saved to ${storedUrl}`);
 
-    // Apply watermark on a COPY of the buffer (separate sharp instances)
+    // Apply watermark on a COPY of the buffer
     try {
       const watermarkedBuffer = await applyWatermark(Buffer.from(imageBuffer));
-      console.log(`[generate] Watermark applied, size: ${watermarkedBuffer.length} bytes. Replacing...`);
+      console.log(`[generate-v2] Watermark applied, size: ${watermarkedBuffer.length} bytes. Replacing...`);
       storedUrl = await saveGeneratedImage(watermarkedBuffer, generationId, 1);
-      console.log(`[generate] Watermarked version saved to ${storedUrl}`);
+      console.log(`[generate-v2] Watermarked version saved to ${storedUrl}`);
     } catch (wmError) {
-      console.warn("[generate] Watermark failed, keeping original:", wmError);
+      console.warn("[generate-v2] Watermark failed, keeping original:", wmError);
     }
 
     const processingTime = Date.now() - startTime;
-    console.log(`[generate] Done. time=${processingTime}ms`);
+    console.log(`[generate-v2] Done. time=${processingTime}ms`);
 
     await supabase
       .from("ai_photo_generations")
@@ -185,7 +130,7 @@ export async function createGeneration(
       .eq("id", generationId);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error("[generate] FAILED:", msg);
+    console.error("[generate-v2] FAILED:", msg);
 
     const processingTime = Date.now() - startTime;
     await supabase
@@ -201,30 +146,4 @@ export async function createGeneration(
   }
 
   return generationId;
-}
-
-/**
- * Update a specific variant's status and URL.
- * Uses service_role client.
- */
-export async function updateVariant(
-  generationId: string,
-  variantIndex: number,
-  status: string,
-  url?: string
-): Promise<void> {
-  const supabase = createServiceClient();
-
-  const update: Record<string, unknown> = {
-    [`variant_${variantIndex}_status`]: status,
-  };
-
-  if (url) {
-    update[`variant_${variantIndex}_url`] = url;
-  }
-
-  await supabase
-    .from("ai_photo_generations")
-    .update(update)
-    .eq("id", generationId);
 }

@@ -1,0 +1,112 @@
+export type QuestionType = "rating" | "multiple_choice" | "text";
+
+export interface QuestionOption {
+  value: string;
+  label: string;
+}
+
+export interface Question {
+  id: string;
+  text: string;
+  type: QuestionType;
+  options?: QuestionOption[];
+  required: boolean;
+}
+
+export const SURVEY_QUESTIONS: Question[] = [
+  {
+    id: "evento_geral",
+    text: "Como voce avalia o evento no geral?",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "entrada",
+    text: "Entrada no evento",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "organizacao",
+    text: "Organizacao interna",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "limpeza",
+    text: "Limpeza e estrutura",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "banheiros",
+    text: "Banheiros",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "alimentacao",
+    text: "Alimentacao e bebida",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "precos",
+    text: "Preco das coisas dentro do evento",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "seguranca",
+    text: "Seguranca",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "circulacao",
+    text: "Facilidade para circular",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "experiencia_carnaval",
+    text: "Experiencia do carnaval em si",
+    type: "rating",
+    required: true,
+  },
+  {
+    id: "voltaria",
+    text: "Voce voltaria no proximo ano?",
+    type: "multiple_choice",
+    options: [
+      { value: "sim", label: "Sim" },
+      { value: "talvez", label: "Talvez" },
+      { value: "nao", label: "Nao" },
+    ],
+    required: true,
+  },
+  {
+    id: "incomodou",
+    text: "O que mais te incomodou hoje?",
+    type: "text",
+    required: false,
+  },
+  {
+    id: "surpreendeu",
+    text: "O que mais te surpreendeu positivamente?",
+    type: "text",
+    required: false,
+  },
+  {
+    id: "melhorar",
+    text: "Se pudesse melhorar uma coisa agora, o que seria?",
+    type: "text",
+    required: false,
+  },
+];
+
+export const SURVEY_PRIZE = {
+  name: "Adesivo Exclusivo Keepit",
+  emoji: "🎉",
+  description: "Retire seu brinde no stand da Keepit!",
+};

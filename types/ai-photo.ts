@@ -60,8 +60,7 @@ export interface AiPhotoGeneration {
 // POST /api/ai-photo/generate
 export interface GenerateRequest {
   lead_id: string;
-  template_id: string;
-  reference_photos: string[];
+  photo_url: string;
 }
 
 export interface GenerateResponse {
@@ -108,8 +107,7 @@ export interface AiPhotoErrorResponse {
 
 export type AiPhotoErrorCode =
   | "LEAD_NOT_FOUND"
-  | "TEMPLATE_NOT_FOUND"
-  | "INVALID_PHOTOS"
+  | "INVALID_PHOTO"
   | "GENERATION_LIMIT"
   | "GENERATION_NOT_FOUND"
   | "AI_ERROR"
@@ -120,11 +118,8 @@ export type AiPhotoErrorCode =
 // =====================================================
 
 export const AI_PHOTO_LIMITS = {
-  MAX_GENERATIONS_PER_LEAD: 999,
-  MAX_REFERENCE_PHOTOS: 10,
-  MIN_REFERENCE_PHOTOS: 1,
+  MAX_GENERATIONS_PER_LEAD: 3,
   MAX_PHOTO_SIZE_MB: 10,
   POLL_INTERVAL_MS: 3000,
   POLL_TIMEOUT_MS: 120_000,
-  VARIANT_COUNT: 3,
 } as const;

@@ -55,8 +55,8 @@ interface KieTaskDetailResponse {
 /**
  * Generate a single image using Kie.ai (Nano Banana Pro).
  *
- * For face swap: reference photos (face source) first, template (body target) last.
- * The prompt tells the model to insert the face from the first images into the last image.
+ * V2: accepts a flat list of image URLs + prompt. No template concept.
+ * For clothing swap: single user photo + prompt to transform outfit.
  *
  * Flow:
  * 1. POST createTask with prompt + image_input
@@ -64,27 +64,16 @@ interface KieTaskDetailResponse {
  * 3. Download the result image and return as Buffer
  */
 export async function generateImage(input: {
-  referencePhotoUrls: string[];
-  templateImageUrl: string;
+  imageUrls: string[];
   prompt: string;
   aspectRatio?: string;
   resolution?: string;
 }): Promise<Buffer> {
   const apiKey = getApiKey();
 
-  // Build image_input array: reference photos first, template last
-  // Order matters for face swap: source face → target body
-  const imageInput = [
-    ...input.referencePhotoUrls,
-    resolvePublicUrl(input.templateImageUrl),
-  ];
-
-  const refCount = input.referencePhotoUrls.length;
-  const templateUrl = imageInput[imageInput.length - 1];
+  const imageInput = input.imageUrls.map(resolvePublicUrl);
 
   console.log("[kie] Creating task with", imageInput.length, "images (model:", KIE_MODEL, ")");
-  console.log("[kie] Reference photos:", refCount);
-  console.log("[kie] Template URL (last):", templateUrl);
 
   // 1. Create task
   const createRes = await fetch(`${KIE_API_BASE}/createTask`, {

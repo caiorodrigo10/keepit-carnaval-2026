@@ -62,12 +62,16 @@ const ORIGIN_LABELS: Record<LeadOrigin, string> = {
   qr_code: "QR Code",
   spontaneous: "Espontaneo",
   traffic: "Trafego Pago",
+  roleta: "Roleta",
+  pesquisa: "Pesquisa",
 };
 
 const ORIGIN_COLORS: Record<LeadOrigin, string> = {
   qr_code: "bg-blue-100 text-blue-800",
   spontaneous: "bg-green-100 text-green-800",
   traffic: "bg-purple-100 text-purple-800",
+  roleta: "bg-yellow-100 text-yellow-800",
+  pesquisa: "bg-orange-100 text-orange-800",
 };
 
 function formatPhone(phone: string): string {
@@ -279,6 +283,8 @@ export function LeadsContent({ leads, session }: LeadsContentProps) {
                         <SelectItem value="qr_code">QR Code</SelectItem>
                         <SelectItem value="spontaneous">Espontaneo</SelectItem>
                         <SelectItem value="traffic">Trafego Pago</SelectItem>
+                        <SelectItem value="roleta">Roleta</SelectItem>
+                        <SelectItem value="pesquisa">Pesquisa</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

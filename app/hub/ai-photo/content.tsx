@@ -12,13 +12,11 @@ import {
 } from "@/lib/image-compression";
 import {
   AI_PHOTO_LIMITS,
-  type TemplatesResponse,
   type VariantInfo,
   type AiPhotoErrorResponse,
 } from "@/types/ai-photo";
 import { getStoredLead, type StoredLead } from "@/lib/lead-storage";
 import { WizardHeader } from "@/components/ai-photo/wizard-header";
-import { TemplateSelector } from "@/components/ai-photo/template-selector";
 import {
   PhotoUploader,
   type UploadableFile,
@@ -27,8 +25,6 @@ import { GenerationLoading } from "@/components/ai-photo/generation-loading";
 import { ResultGallery } from "@/components/ai-photo/result-gallery";
 import type { WizardStep } from "@/components/ai-photo/wizard-stepper";
 
-type TemplateInfo = TemplatesResponse["templates"][number];
-
 interface AiPhotoWizardProps {
   lead: StoredLead;
 }
@@ -36,30 +32,23 @@ interface AiPhotoWizardProps {
 export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
   const router = useRouter();
 
-  // Step state
-  const [step, setStep] = useState<WizardStep>("templates");
+  // Step state — v2: upload → generating → results (no template step)
+  const [step, setStep] = useState<WizardStep>("upload");
 
-  // Step 1: Templates
-  const [templates, setTemplates] = useState<TemplateInfo[]>([]);
-  const [templatesLoading, setTemplatesLoading] = useState(true);
-  const [templatesError, setTemplatesError] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateInfo | null>(null);
-
-  // Step 2: Photos
-  const [files, setFiles] = useState<UploadableFile[]>([]);
+  // Single file
+  const [file, setFile] = useState<UploadableFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Step 3: Generation — use ref + counter to guarantee re-render
+  // Generation — use ref + counter to guarantee re-render
   const generationErrorRef = useRef<string | null>(null);
   const generationResultRef = useRef<{ variants: VariantInfo[]; isComplete: boolean } | null>(null);
   const [genTick, setGenTick] = useState(0);
 
-  // Derived values from refs (re-read on every render triggered by genTick)
+  // Derived values from refs
   const generationError = generationErrorRef.current;
   const isComplete = generationResultRef.current?.isComplete ?? false;
 
-  // Stable setter that always triggers re-render
   const setGenerationError = useCallback((error: string | null) => {
     generationErrorRef.current = error;
     setGenTick((t) => t + 1);
@@ -69,34 +58,17 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
     setGenTick((t) => t + 1);
   }, []);
 
-  // Step 4: Results (derived from ref)
+  // Results (derived from ref)
   const variants = generationResultRef.current?.variants ?? [];
 
-  // Global
+  // Remaining generations
   const [remainingGenerations, setRemainingGenerations] = useState<number>(
     AI_PHOTO_LIMITS.MAX_GENERATIONS_PER_LEAD
   );
 
-  // Fetch templates on mount
   useEffect(() => {
-    fetchTemplates();
     checkGenerationLimit();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function fetchTemplates() {
-    setTemplatesLoading(true);
-    setTemplatesError(null);
-    try {
-      const res = await fetch("/api/ai-photo/templates");
-      if (!res.ok) throw new Error("Falha ao carregar modelos");
-      const data: TemplatesResponse = await res.json();
-      setTemplates(data.templates);
-    } catch {
-      setTemplatesError("Nao foi possivel carregar os modelos. Verifique sua conexao.");
-    } finally {
-      setTemplatesLoading(false);
-    }
-  }
 
   async function checkGenerationLimit() {
     try {
@@ -115,127 +87,88 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
     }
   }
 
-  // Step 1 handlers
-  const handleSelectTemplate = useCallback((template: TemplateInfo) => {
-    setSelectedTemplate(template);
-  }, []);
+  // File selection
+  const handleSelectFile = useCallback((newFile: File) => {
+    const error = validateImageFile(newFile);
+    if (error) {
+      toast.error(error);
+      return;
+    }
 
-  const handleContinueToUpload = useCallback(() => {
-    if (selectedTemplate) setStep("upload");
-  }, [selectedTemplate]);
+    // Revoke previous preview URL
+    setFile((prev) => {
+      if (prev) URL.revokeObjectURL(prev.preview);
+      return null;
+    });
 
-  // Step 2 handlers
-  const handleAddFiles = useCallback(
-    (fileList: FileList) => {
-      const currentCount = files.length;
-      const maxToAdd = AI_PHOTO_LIMITS.MAX_REFERENCE_PHOTOS - currentCount;
-      if (maxToAdd <= 0) {
-        toast.error(`Maximo de ${AI_PHOTO_LIMITS.MAX_REFERENCE_PHOTOS} fotos atingido`);
-        return;
-      }
-
-      const newFiles: UploadableFile[] = [];
-      const limit = Math.min(fileList.length, maxToAdd);
-
-      for (let i = 0; i < limit; i++) {
-        const file = fileList[i];
-        const error = validateImageFile(file);
-        if (error) {
-          toast.error(error);
-          continue;
-        }
-        newFiles.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          file,
-          preview: URL.createObjectURL(file),
-          status: "pending",
-          url: null,
-          error: null,
-        });
-      }
-
-      if (newFiles.length > 0) {
-        setFiles((prev) => [...prev, ...newFiles]);
-      }
-    },
-    [files.length]
-  );
-
-  const handleRemoveFile = useCallback((id: string) => {
-    setFiles((prev) => {
-      const file = prev.find((f) => f.id === id);
-      if (file) URL.revokeObjectURL(file.preview);
-      return prev.filter((f) => f.id !== id);
+    setFile({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      file: newFile,
+      preview: URL.createObjectURL(newFile),
+      status: "pending",
+      url: null,
+      error: null,
     });
   }, []);
 
+  const handleRemoveFile = useCallback(() => {
+    setFile((prev) => {
+      if (prev) URL.revokeObjectURL(prev.preview);
+      return null;
+    });
+  }, []);
+
+  // Generate
   const handleGenerate = useCallback(async () => {
-    if (!selectedTemplate || files.length < AI_PHOTO_LIMITS.MIN_REFERENCE_PHOTOS) return;
+    if (!file) return;
 
     setIsUploading(true);
     setUploadProgress(0);
 
     const supabase = createClient();
-    const uploadedUrls: string[] = [];
-    const totalFiles = files.length;
 
     try {
-      // Upload all files to Supabase Storage
-      for (let i = 0; i < totalFiles; i++) {
-        const f = files[i];
+      // Compress
+      setFile((prev) => prev ? { ...prev, status: "compressing" } : prev);
+      setUploadProgress(20);
 
-        // Mark compressing
-        setFiles((prev) =>
-          prev.map((p) => (p.id === f.id ? { ...p, status: "compressing" } : p))
-        );
-        setUploadProgress(Math.round(((i * 2) / (totalFiles * 2)) * 80));
+      const compressed = await compressImage(file.file, fullSizeCompressionOptions);
 
-        const compressed = await compressImage(f.file, fullSizeCompressionOptions);
+      // Upload
+      setFile((prev) => prev ? { ...prev, status: "uploading" } : prev);
+      setUploadProgress(50);
 
-        // Mark uploading
-        setFiles((prev) =>
-          prev.map((p) => (p.id === f.id ? { ...p, status: "uploading" } : p))
-        );
-        setUploadProgress(Math.round(((i * 2 + 1) / (totalFiles * 2)) * 80));
+      const timestamp = Date.now();
+      const path = `references/${lead.id}/${timestamp}.jpg`;
 
-        const timestamp = Date.now();
-        const path = `references/${lead.id}/${timestamp}-${i}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from("ai-photos")
+        .upload(path, compressed, {
+          contentType: "image/jpeg",
+          upsert: false,
+        });
 
-        const { error: uploadError } = await supabase.storage
-          .from("ai-photos")
-          .upload(path, compressed, {
-            contentType: "image/jpeg",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          throw new Error(`Erro ao enviar foto ${i + 1}: ${uploadError.message}`);
-        }
-
-        const { data: urlData } = supabase.storage
-          .from("ai-photos")
-          .getPublicUrl(path);
-
-        uploadedUrls.push(urlData.publicUrl);
-
-        // Mark done
-        setFiles((prev) =>
-          prev.map((p) =>
-            p.id === f.id ? { ...p, status: "done", url: urlData.publicUrl } : p
-          )
-        );
+      if (uploadError) {
+        throw new Error(`Erro ao enviar foto: ${uploadError.message}`);
       }
 
+      const { data: urlData } = supabase.storage
+        .from("ai-photos")
+        .getPublicUrl(path);
+
+      const photoUrl = urlData.publicUrl;
+
+      setFile((prev) => prev ? { ...prev, status: "done", url: photoUrl } : prev);
       setUploadProgress(90);
 
-      // Transition to generating step
+      // Transition to generating
       setIsUploading(false);
       setStep("generating");
       setGenerationError(null);
       generationResultRef.current = null;
       setGenTick((t) => t + 1);
 
-      // Call generate API
+      // Call generate API — v2: single photo, no template
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 180_000);
 
@@ -244,8 +177,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           lead_id: lead.id,
-          template_id: selectedTemplate.id,
-          reference_photos: uploadedUrls,
+          photo_url: photoUrl,
         }),
         signal: controller.signal,
       });
@@ -268,7 +200,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       const generateData = await res.json();
       const generationId = generateData.generation_id;
 
-      // Fetch status directly (no useEffect needed since API is synchronous)
+      // Fetch status directly (API is synchronous)
       const statusRes = await fetch(`/api/ai-photo/status/${generationId}`);
       if (!statusRes.ok) {
         setGenerationError("Erro ao obter resultado da geracao");
@@ -279,7 +211,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       const gen = statusData.generation;
 
       if (gen.status === "failed") {
-        const rawError = gen.error_message || "Todas as variantes falharam";
+        const rawError = gen.error_message || "Falha na geracao";
         const isServiceError = rawError.includes("429") || rawError.includes("quota") || rawError.includes("timed out") || rawError.includes("credits") || rawError.includes("Kie.ai");
         setGenerationError(
           isServiceError
@@ -295,29 +227,25 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       setTimeout(() => setStep("results"), 600);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Erro ao gerar foto com IA";
-      // If uploads were completed, we're in the generation phase
-      if (uploadedUrls.length === totalFiles) {
+      if (file.url || file.status === "done") {
+        // Upload was done, error in generation
         setGenerationError(errorMsg);
       } else {
         setIsUploading(false);
-        toast.error(
-          error instanceof Error ? error.message : "Erro ao enviar fotos"
-        );
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.status !== "done" ? { ...f, status: "error", error: "Falha no upload" } : f
-          )
-        );
+        toast.error(error instanceof Error ? error.message : "Erro ao enviar foto");
+        setFile((prev) => prev ? { ...prev, status: "error", error: "Falha no upload" } : prev);
       }
     }
-  }, [selectedTemplate, files, lead.id]);
+  }, [file, lead.id, setGenerationError, setGenerationResult]);
 
+  // Retry generation with same uploaded photo
   const handleRetryGeneration = useCallback(async () => {
+    const photoUrl = file?.url;
+    if (!photoUrl) return;
+
     setGenerationError(null);
     generationResultRef.current = null;
     setGenTick((t) => t + 1);
-    const uploadedUrls = files.filter((f) => f.url).map((f) => f.url!);
-    if (uploadedUrls.length < AI_PHOTO_LIMITS.MIN_REFERENCE_PHOTOS || !selectedTemplate) return;
 
     try {
       const controller = new AbortController();
@@ -328,8 +256,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           lead_id: lead.id,
-          template_id: selectedTemplate.id,
-          reference_photos: uploadedUrls,
+          photo_url: photoUrl,
         }),
         signal: controller.signal,
       });
@@ -337,9 +264,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       clearTimeout(timeout);
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({
-          error: "Erro desconhecido",
-        }));
+        const errData = await res.json().catch(() => ({ error: "Erro desconhecido" }));
         setGenerationError(errData.error);
         return;
       }
@@ -347,7 +272,6 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       const generateData = await res.json();
       const generationId = generateData.generation_id;
 
-      // Fetch status directly
       const statusRes = await fetch(`/api/ai-photo/status/${generationId}`);
       if (!statusRes.ok) {
         setGenerationError("Erro ao obter resultado da geracao");
@@ -358,7 +282,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       const gen = statusData.generation;
 
       if (gen.status === "failed") {
-        const rawError = gen.error_message || "Todas as variantes falharam";
+        const rawError = gen.error_message || "Falha na geracao";
         const isServiceError = rawError.includes("429") || rawError.includes("quota") || rawError.includes("timed out") || rawError.includes("credits") || rawError.includes("Kie.ai");
         setGenerationError(
           isServiceError
@@ -372,41 +296,34 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       setRemainingGenerations((prev) => Math.max(0, prev - 1));
       setTimeout(() => setStep("results"), 600);
     } catch (err) {
-      setGenerationError(
-        err instanceof Error ? err.message : "Erro ao gerar foto com IA"
-      );
+      setGenerationError(err instanceof Error ? err.message : "Erro ao gerar foto com IA");
     }
-  }, [files, selectedTemplate, lead.id]);
+  }, [file, lead.id, setGenerationError, setGenerationResult]);
 
   const handleRegenerate = useCallback(() => {
-    // Re-generate with same template and photos
     generationResultRef.current = null;
     setGenerationError(null);
     setStep("generating");
-    // Trigger generation again
     handleRetryGeneration();
   }, [setGenerationError, handleRetryGeneration]);
 
   const handleGenerateAnother = useCallback(() => {
-    // Reset for new generation with different template
-    setSelectedTemplate(null);
-    setFiles([]);
+    setFile((prev) => {
+      if (prev) URL.revokeObjectURL(prev.preview);
+      return null;
+    });
     generationResultRef.current = null;
     setGenerationError(null);
-    setStep("templates");
+    setStep("upload");
   }, [setGenerationError]);
 
   // Back navigation
   const handleBack = useCallback(() => {
     switch (step) {
-      case "templates":
+      case "upload":
         router.push("/hub");
         break;
-      case "upload":
-        setStep("templates");
-        break;
       case "results":
-        // Don't go back to generating, go to templates
         handleGenerateAnother();
         break;
     }
@@ -435,26 +352,6 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="max-w-lg mx-auto">
           <AnimatePresence mode="wait">
-            {step === "templates" && (
-              <motion.div
-                key="templates"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-              >
-                <TemplateSelector
-                  templates={templates}
-                  isLoading={templatesLoading}
-                  error={templatesError}
-                  selectedId={selectedTemplate?.id ?? null}
-                  onSelect={handleSelectTemplate}
-                  onContinue={handleContinueToUpload}
-                  onRetry={fetchTemplates}
-                />
-              </motion.div>
-            )}
-
             {step === "upload" && (
               <motion.div
                 key="upload"
@@ -464,13 +361,12 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
                 transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
               >
                 <PhotoUploader
-                  files={files}
+                  file={file}
                   isUploading={isUploading}
                   uploadProgress={uploadProgress}
-                  onAddFiles={handleAddFiles}
+                  onSelectFile={handleSelectFile}
                   onRemoveFile={handleRemoveFile}
                   onGenerate={handleGenerate}
-                  onBack={() => setStep("templates")}
                 />
               </motion.div>
             )}
@@ -484,7 +380,7 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
                 transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
               >
                 <GenerationLoading
-                  templateName={selectedTemplate?.name ?? ""}
+                  templateName="Carnaval"
                   error={generationError}
                   isComplete={isComplete}
                   onRetry={handleRetryGeneration}
@@ -503,7 +399,6 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
               >
                 <ResultGallery
                   variants={variants}
-                  templateName={selectedTemplate?.name ?? ""}
                   remainingGenerations={remainingGenerations}
                   onGenerateAnother={handleGenerateAnother}
                   onRegenerate={handleRegenerate}
@@ -520,7 +415,6 @@ export function AiPhotoWizard({ lead }: AiPhotoWizardProps) {
 
 /**
  * Client-only wrapper that handles lead auth check.
- * Loaded via dynamic import with ssr: false to avoid hydration mismatch.
  */
 export function AiPhotoClient() {
   const router = useRouter();

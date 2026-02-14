@@ -4,8 +4,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { key: "templates", label: "Modelo" },
-  { key: "upload", label: "Fotos" },
+  { key: "upload", label: "Foto" },
   { key: "generating", label: "Gerando" },
   { key: "results", label: "Resultado" },
 ] as const;

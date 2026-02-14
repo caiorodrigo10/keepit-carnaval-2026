@@ -16,7 +16,6 @@ import type { VariantInfo } from "@/types/ai-photo";
 
 interface ResultGalleryProps {
   variants: VariantInfo[];
-  templateName: string;
   remainingGenerations: number;
   onGenerateAnother: () => void;
   onRegenerate: () => void;
@@ -25,7 +24,6 @@ interface ResultGalleryProps {
 
 export function ResultGallery({
   variants,
-  templateName,
   remainingGenerations,
   onGenerateAnother,
   onRegenerate,
@@ -91,7 +89,7 @@ export function ResultGallery({
             {isSuccess ? "Sua foto ficou incrivel!" : "Geracao concluida"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Modelo: {templateName}
+            Fantasia de Carnaval com IA
           </p>
         </div>
       </div>
@@ -107,7 +105,7 @@ export function ResultGallery({
           <div className="relative bg-muted">
             <img
               src={variant.url!}
-              alt={`Foto IA - ${templateName}`}
+              alt="Foto IA - Carnaval Keepit"
               className="w-full h-auto"
             />
           </div>
@@ -156,7 +154,7 @@ export function ResultGallery({
                 onClick={onGenerateAnother}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Outro modelo
+                Nova foto
               </Button>
               <Button
                 variant="outline"

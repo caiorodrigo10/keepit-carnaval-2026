@@ -109,6 +109,8 @@ export async function getLeadsByOrigin(
     qr_code: "QR Code",
     spontaneous: "Espontaneo",
     traffic: "Trafego Pago",
+    roleta: "Roleta",
+    pesquisa: "Pesquisa",
   };
 
   const counts = leads.reduce<Record<LeadOrigin, number>>((acc, lead) => {

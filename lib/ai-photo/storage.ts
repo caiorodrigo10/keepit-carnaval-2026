@@ -28,5 +28,6 @@ export async function saveGeneratedImage(
   }
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  // Add cache-buster to force CDN to serve fresh version (important for watermark re-upload)
+  return `${data.publicUrl}?t=${Date.now()}`;
 }

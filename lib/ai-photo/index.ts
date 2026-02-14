@@ -1,11 +1,7 @@
-export { generateImage } from "./gemini-client";
-export { buildVariantPrompts } from "./templates";
-export { validateGenerateRequest, validateReferencePhotos, isValidUUID } from "./validations";
+export { validateGenerateRequest, isValidUUID } from "./validations";
 export { saveGeneratedImage } from "./storage";
 export {
   createGeneration,
-  updateVariant,
-  getTemplate,
   leadExists,
   hasReachedLimit,
   getLeadGenerationCount,

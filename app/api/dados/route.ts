@@ -70,9 +70,9 @@ export async function POST(req: NextRequest) {
   const templateCounts: Record<string, { name: string; count: number }> = {};
   if (templateUsageRaw) {
     for (const gen of templateUsageRaw) {
-      const tid = gen.template_id;
+      const tid = gen.template_id ?? "sem-template";
       if (!templateCounts[tid]) {
-        templateCounts[tid] = { name: templateMap.get(tid) || "Desconhecido", count: 0 };
+        templateCounts[tid] = { name: templateMap.get(tid) || "Sem template (v2)", count: 0 };
       }
       templateCounts[tid].count++;
     }

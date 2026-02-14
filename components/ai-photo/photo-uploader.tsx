@@ -6,19 +6,13 @@ import {
   Camera,
   Upload,
   X,
-  Plus,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
   Info,
   Image as ImageIcon,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { AI_PHOTO_LIMITS } from "@/types/ai-photo";
 
 export interface UploadableFile {
   id: string;
@@ -30,49 +24,40 @@ export interface UploadableFile {
 }
 
 interface PhotoUploaderProps {
-  files: UploadableFile[];
+  file: UploadableFile | null;
   isUploading: boolean;
   uploadProgress: number;
-  onAddFiles: (files: FileList) => void;
-  onRemoveFile: (id: string) => void;
+  onSelectFile: (file: File) => void;
+  onRemoveFile: () => void;
   onGenerate: () => void;
-  onBack: () => void;
 }
 
 export function PhotoUploader({
-  files,
+  file,
   isUploading,
   uploadProgress,
-  onAddFiles,
+  onSelectFile,
   onRemoveFile,
   onGenerate,
-  onBack,
 }: PhotoUploaderProps) {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
-  const minPhotos = AI_PHOTO_LIMITS.MIN_REFERENCE_PHOTOS;
-  const maxPhotos = AI_PHOTO_LIMITS.MAX_REFERENCE_PHOTOS;
-  const hasMinimum = files.length >= minPhotos;
-  const canAddMore = files.length < maxPhotos;
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (fileList && fileList.length > 0) {
-      onAddFiles(fileList);
+      onSelectFile(fileList[0]);
     }
     e.target.value = "";
   };
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Hidden file inputs — triggered programmatically via ref.click() for
-          maximum mobile compatibility (label+htmlFor breaks on iOS Safari) */}
+      {/* Hidden file inputs */}
       <input
         ref={galleryRef}
         type="file"
         accept="image/*"
-        multiple
         onChange={handleInputChange}
         className="hidden"
         disabled={isUploading}
@@ -87,185 +72,132 @@ export function PhotoUploader({
         disabled={isUploading}
       />
 
+      {/* Title */}
+      <div className="text-center space-y-2 py-2">
+        <h2 className="text-2xl font-black tracking-tight text-keepit-dark">
+          Sua Foto de Carnaval com IA
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Envie uma foto sua e a IA vai transformar sua roupa em uma fantasia de carnaval!
+        </p>
+      </div>
+
       {/* Tips card */}
-      <div className="card-keepit p-6">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-xl bg-keepit-brand/10 flex items-center justify-center shrink-0">
-              <Info className="h-5 w-5 text-keepit-brand" />
-            </div>
-            <div>
-              <h3 className="font-black tracking-tight text-keepit-dark mb-2">Dicas para melhores resultados</h3>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-keepit-brand shrink-0 mt-0.5" />
-                  <span>Quanto mais fotos suas, melhor o resultado da IA</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-keepit-brand shrink-0 mt-0.5" />
-                  <span>Rosto visivel e bem iluminado</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-keepit-brand shrink-0 mt-0.5" />
-                  <span>Evite oculos escuros ou mascara</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-keepit-brand shrink-0 mt-0.5" />
-                  <span>Diferentes angulos ajudam a IA</span>
-                </li>
-              </ul>
-            </div>
+      <div className="card-keepit p-5">
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-xl bg-keepit-brand/10 flex items-center justify-center shrink-0">
+            <Info className="h-4 w-4 text-keepit-brand" />
           </div>
+          <div>
+            <h3 className="font-bold text-sm text-keepit-dark mb-1">Dicas para melhores resultados</h3>
+            <ul className="space-y-1 text-xs text-muted-foreground">
+              <li>Foto de corpo inteiro ou da cintura para cima</li>
+              <li>Boa iluminacao e fundo limpo</li>
+              <li>Roupa visivel (evite bracos cruzados)</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      {/* Photo count badge */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-black tracking-tight text-keepit-dark">Suas fotos</h3>
-        <Badge
-          variant="outline"
-          className={cn(
-            hasMinimum
-              ? "border-keepit-brand/30 text-keepit-brand"
-              : "border-destructive text-destructive"
-          )}
-        >
-          {files.length}/{maxPhotos} fotos
-        </Badge>
-      </div>
-
-      {/* Photo grid */}
-      {files.length === 0 ? (
-        <div className="card-keepit border-dashed border-2 border-keepit-dark/10 p-6">
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="w-16 h-16 rounded-full bg-keepit-brand/10 flex items-center justify-center">
-                <ImageIcon className="w-8 h-8 text-keepit-brand" />
+      {/* Photo area */}
+      <AnimatePresence mode="wait">
+        {!file ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="card-keepit border-dashed border-2 border-keepit-dark/10 p-6"
+          >
+            <div className="flex flex-col items-center gap-4 py-6">
+              <div className="w-20 h-20 rounded-full bg-keepit-brand/10 flex items-center justify-center">
+                <ImageIcon className="w-10 h-10 text-keepit-brand" />
               </div>
               <div className="text-center">
-                <p className="text-keepit-dark font-black tracking-tight">Adicione suas fotos</p>
+                <p className="text-keepit-dark font-black tracking-tight text-lg">Tire ou selecione uma foto</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Minimo {minPhotos} foto, maximo {maxPhotos} — quanto mais, melhor!
+                  A IA vai transformar sua roupa em fantasia de carnaval
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <button
                   type="button"
                   onClick={() => cameraRef.current?.click()}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold cursor-pointer bg-keepit-dark text-white hover:bg-black transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold cursor-pointer bg-keepit-dark text-white hover:bg-black transition-colors"
                 >
                   <Camera className="w-5 h-5" />
-                  Camera
+                  Tirar Foto
                 </button>
                 <button
                   type="button"
                   onClick={() => galleryRef.current?.click()}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-keepit-dark/10 px-4 py-3 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
                 >
                   <Upload className="w-5 h-5" />
                   Galeria
                 </button>
               </div>
             </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          <AnimatePresence mode="popLayout">
-            {files.map((file) => (
-              <motion.div
-                key={file.id}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                layout
-                className="aspect-square relative rounded-2xl overflow-hidden bg-muted"
-              >
+          </motion.div>
+        ) : (
+          <motion.div
+            key="preview"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative"
+          >
+            <div className="card-keepit overflow-hidden">
+              <div className="relative">
                 <img
                   src={file.preview}
-                  alt="Foto de referencia"
-                  className="w-full h-full object-cover"
+                  alt="Sua foto"
+                  className="w-full max-h-[400px] object-contain bg-black/5"
                 />
 
                 {/* Status overlay */}
                 {(file.status === "compressing" || file.status === "uploading") && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 text-white animate-spin" />
-                  </div>
-                )}
-                {file.status === "done" && (
-                  <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-keepit-brand flex items-center justify-center">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                  </div>
-                )}
-                {file.status === "error" && (
-                  <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
-                    <AlertCircle className="w-3.5 h-3.5 text-white" />
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    <span className="text-white text-sm font-medium">
+                      {file.status === "compressing" ? "Comprimindo..." : `Enviando... ${uploadProgress}%`}
+                    </span>
                   </div>
                 )}
 
                 {/* Remove button */}
                 {!isUploading && (
                   <button
-                    onClick={() => onRemoveFile(file.id)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
+                    onClick={onRemoveFile}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              </div>
+            </div>
 
-          {/* Add more button */}
-          {canAddMore && !isUploading && (
-            <motion.button
-              type="button"
-              onClick={() => galleryRef.current?.click()}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="aspect-square rounded-2xl border-2 border-dashed border-keepit-dark/10 flex flex-col items-center justify-center gap-1 hover:bg-keepit-dark/5 transition-colors cursor-pointer"
-            >
-              <Plus className="w-6 h-6 text-keepit-dark/40" />
-              <span className="text-[10px] text-keepit-dark/40">Adicionar</span>
-            </motion.button>
-          )}
-        </div>
-      )}
-
-      {/* Upload progress */}
-      {isUploading && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Preparando fotos...</span>
-            <span className="text-foreground font-medium">{uploadProgress}%</span>
-          </div>
-          <Progress value={uploadProgress} className="h-2" />
-        </div>
-      )}
-
-      {/* Fixed bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)] p-4">
-        <div className="max-w-lg mx-auto space-y-2">
-          {files.length > 0 && canAddMore && !isUploading && (
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => cameraRef.current?.click()}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
-              >
-                <Camera className="w-4 h-4" />
-                Camera
-              </button>
+            {/* Change photo button */}
+            {!isUploading && (
               <button
                 type="button"
                 onClick={() => galleryRef.current?.click()}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-keepit-dark/10 px-4 py-2 text-sm font-semibold cursor-pointer text-keepit-dark hover:bg-keepit-dark/5 transition-colors"
+                className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-keepit-dark/10 px-4 py-2.5 text-sm font-medium cursor-pointer text-keepit-dark/60 hover:bg-keepit-dark/5 transition-colors"
               >
-                <Upload className="w-4 h-4" />
-                Galeria
+                <RefreshCw className="w-4 h-4" />
+                Trocar foto
               </button>
-            </div>
-          )}
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fixed bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)] p-4">
+        <div className="max-w-lg mx-auto">
           <Button
-            className="w-full bg-keepit-dark text-white hover:bg-black font-semibold h-12"
-            disabled={!hasMinimum || isUploading}
+            className="w-full bg-keepit-dark text-white hover:bg-black font-semibold h-12 rounded-xl"
+            disabled={!file || isUploading}
             onClick={onGenerate}
           >
             {isUploading ? (
@@ -276,7 +208,7 @@ export function PhotoUploader({
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                Gerar Minha Foto
+                Transformar em Carnaval
               </>
             )}
           </Button>
@@ -285,4 +217,3 @@ export function PhotoUploader({
     </div>
   );
 }
-

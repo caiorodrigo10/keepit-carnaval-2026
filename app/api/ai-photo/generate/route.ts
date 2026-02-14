@@ -3,7 +3,6 @@ import { validateGenerateRequest } from "@/lib/ai-photo/validations";
 import {
   leadExists,
   hasReachedLimit,
-  getTemplate,
   createGeneration,
 } from "@/lib/ai-photo/generate";
 import type { GenerateRequest, GenerateResponse, AiPhotoErrorResponse } from "@/types/ai-photo";
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
     const validationError = validateGenerateRequest(body);
     if (validationError) {
       return NextResponse.json(
-        { success: false, error: validationError, code: "INVALID_PHOTOS" } satisfies AiPhotoErrorResponse,
+        { success: false, error: validationError, code: "INVALID_PHOTO" } satisfies AiPhotoErrorResponse,
         { status: 400 }
       );
     }
@@ -45,21 +44,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fetch template
-    const template = await getTemplate(body.template_id);
-    if (!template) {
-      return NextResponse.json(
-        { success: false, error: "Template nao encontrado", code: "TEMPLATE_NOT_FOUND" } satisfies AiPhotoErrorResponse,
-        { status: 404 }
-      );
-    }
-
-    // Generate via Kie.ai nano-banana-pro (synchronous - returns when done)
-    const generationId = await createGeneration(
-      body.lead_id,
-      template,
-      body.reference_photos
-    );
+    // Generate via Kie.ai nano-banana-pro — v2: single photo clothing swap
+    const generationId = await createGeneration(body.lead_id, body.photo_url);
 
     return NextResponse.json(
       { success: true, generation_id: generationId } satisfies GenerateResponse,

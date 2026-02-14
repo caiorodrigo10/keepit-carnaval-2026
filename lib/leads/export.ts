@@ -27,6 +27,8 @@ const ORIGIN_LABELS: Record<LeadOrigin, string> = {
   qr_code: "QR Code",
   spontaneous: "Espontaneo",
   traffic: "Trafego Pago",
+  roleta: "Roleta",
+  pesquisa: "Pesquisa",
 };
 
 /**
