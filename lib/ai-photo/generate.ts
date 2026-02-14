@@ -93,6 +93,7 @@ export async function createGeneration(
     "IMPORTANT RULES FOR THE COSTUME: The outfit must provide FULL BODY COVERAGE appropriate for a family event — no exposed chest, no exposed midriff, no revealing cuts. The costume should be elaborate, colorful and glamorous while being fully covered and dignified.",
     "Automatically detect if the person is male or female and adapt the costume style accordingly — masculine cuts for men, feminine cuts for women.",
     "KEEP EXACTLY THE SAME: the person's face, facial features, skin tone, hair, body pose, and body proportions.",
+    "ACCESSORIES: If the person is wearing glasses, sunglasses, hat, cap, or any accessory, KEEP the accessory but transform its style to match the carnival costume — e.g. regular glasses become jeweled carnival glasses, a cap becomes a feathered headpiece, sunglasses get glitter frames.",
     "CHANGE THE BACKGROUND: place the person in the Sambódromo do Anhembi in São Paulo during carnival night, with colorful lights, confetti in the air, crowd in the bleachers, and the carnival parade avenue visible behind them.",
     "The result must be photorealistic with proper lighting matching a nighttime carnival atmosphere with vibrant stage lights.",
     "High quality, 8K resolution.",

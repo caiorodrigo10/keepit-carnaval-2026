@@ -7,10 +7,13 @@ import {
   Upload,
   X,
   Loader2,
-  Info,
   Image as ImageIcon,
   Sparkles,
   RefreshCw,
+  Sun,
+  Glasses,
+  User,
+  PersonStanding,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -82,19 +85,33 @@ export function PhotoUploader({
         </p>
       </div>
 
-      {/* Tips card */}
-      <div className="card-keepit p-5">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-xl bg-keepit-brand/10 flex items-center justify-center shrink-0">
-            <Info className="h-4 w-4 text-keepit-brand" />
+      {/* Tips with icons */}
+      <div className="card-keepit p-4">
+        <h3 className="font-bold text-sm text-keepit-dark mb-3 text-center">Para melhores resultados</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+              <Sun className="h-4 w-4 text-amber-500" />
+            </div>
+            <span className="text-xs text-muted-foreground leading-tight">Boa iluminacao</span>
           </div>
-          <div>
-            <h3 className="font-bold text-sm text-keepit-dark mb-1">Dicas para melhores resultados</h3>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>Foto de corpo inteiro ou da cintura para cima</li>
-              <li>Boa iluminacao e fundo limpo</li>
-              <li>Roupa visivel (evite bracos cruzados)</li>
-            </ul>
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+              <Glasses className="h-4 w-4 text-blue-500" />
+            </div>
+            <span className="text-xs text-muted-foreground leading-tight">Sem oculos ou bone</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+              <User className="h-4 w-4 text-green-500" />
+            </div>
+            <span className="text-xs text-muted-foreground leading-tight">Corpo inteiro ou cintura pra cima</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+              <PersonStanding className="h-4 w-4 text-purple-500" />
+            </div>
+            <span className="text-xs text-muted-foreground leading-tight">Bracos soltos, sem cruzar</span>
           </div>
         </div>
       </div>
