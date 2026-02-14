@@ -76,13 +76,25 @@ export async function createGeneration(
   const generationId = generation.id;
   const startTime = Date.now();
 
-  // V2 prompt: clothing swap only, preserve everything else
+  // V2 prompt: clothing swap + Sambódromo background
+  // Randomize costume style for variety
+  const costumeStyles = [
+    "a luxurious samba school costume with large colorful feather headdress, sequined bodysuit with full coverage, ornate beaded cape, and sparkling accessories",
+    "an elegant carnival royalty outfit with jeweled crown, flowing glitter cape, embroidered vest with rhinestones, and golden scepter accessories",
+    "a vibrant Bahian-inspired carnival outfit with layered colorful skirts, beaded necklaces, turban headwrap with feathers, and ornate arm bands",
+    "a modern carnival performer outfit with holographic sequined jacket, LED-style glowing accessories, metallic boots, and futuristic feather shoulder pieces",
+    "a traditional samba school porta-bandeira/mestre-sala elegant outfit with flowing sequined fabric, large feathered hat, ornate embroidered details, and dramatic cape",
+    "a tropicalia-inspired carnival look with fruit-adorned headdress, colorful ruffled costume, beaded jewelry layers, and sparkling body accessories",
+  ];
+  const randomStyle = costumeStyles[Math.floor(Math.random() * costumeStyles.length)];
+
   const prompt = [
-    "Transform the clothes and outfit of the person in this photo into a vibrant, elaborate Brazilian carnival costume.",
-    "KEEP EXACTLY THE SAME: the person's face, facial features, skin tone, hair, body pose, body proportions, and the background/environment.",
-    "ONLY CHANGE: the clothing and accessories. Replace them with a colorful carnival outfit featuring sequins, feathers, glitter, beads, and traditional Brazilian carnival elements.",
-    "The costume should look festive, glamorous, and appropriate for Rio de Janeiro or São Paulo carnival.",
-    "The result must be photorealistic — the person should look natural wearing the costume, with proper lighting and shadows matching the original photo.",
+    `Transform this photo: dress the person in ${randomStyle}.`,
+    "IMPORTANT RULES FOR THE COSTUME: The outfit must provide FULL BODY COVERAGE appropriate for a family event — no exposed chest, no exposed midriff, no revealing cuts. The costume should be elaborate, colorful and glamorous while being fully covered and dignified.",
+    "Automatically detect if the person is male or female and adapt the costume style accordingly — masculine cuts for men, feminine cuts for women.",
+    "KEEP EXACTLY THE SAME: the person's face, facial features, skin tone, hair, body pose, and body proportions.",
+    "CHANGE THE BACKGROUND: place the person in the Sambódromo do Anhembi in São Paulo during carnival night, with colorful lights, confetti in the air, crowd in the bleachers, and the carnival parade avenue visible behind them.",
+    "The result must be photorealistic with proper lighting matching a nighttime carnival atmosphere with vibrant stage lights.",
     "High quality, 8K resolution.",
   ].join(" ");
 
