@@ -104,11 +104,11 @@ export function ResultGallery({
           transition={{ duration: 0.5, delay: 0.3 }}
           className="rounded-2xl overflow-hidden border border-[rgba(0,0,0,0.03)] shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
         >
-          <div className="aspect-square relative bg-muted">
+          <div className="relative bg-muted">
             <img
               src={variant.url!}
               alt={`Foto IA - ${templateName}`}
-              className="w-full h-full object-cover"
+              className="w-full h-auto"
             />
           </div>
         </motion.div>
