@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     .select("id, status, reference_photos, variant_1_url, error_message, processing_time_ms, created_at", { count: "exact" });
 
   if (status !== "all") {
-    query = query.eq("status", status);
+    query = query.eq("status", status as "processing" | "completed" | "failed");
   }
 
   const { data, count, error } = await query
