@@ -7,6 +7,7 @@ import { Loader2, ClipboardList, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { SharedHeader } from "@/components/shared-header";
 import { SURVEY_QUESTIONS, SURVEY_PRIZE } from "@/lib/pesquisa/questions";
 import type { Question } from "@/lib/pesquisa/questions";
 
@@ -36,15 +37,15 @@ function RatingInput({
             onClick={() => onChange(n)}
             className={`w-11 h-11 rounded-full text-sm font-bold transition-all ${
               value === n
-                ? "bg-[#66FB95] text-black scale-110 shadow-[0_0_12px_rgba(102,251,149,0.4)]"
-                : "bg-white/10 text-white/70 hover:bg-white/20"
+                ? "bg-keepit-brand text-white scale-110 shadow-[0_0_12px_rgba(52,191,88,0.4)]"
+                : "bg-keepit-dark/5 text-keepit-dark/60 hover:bg-keepit-dark/10"
             }`}
           >
             {n}
           </button>
         ))}
       </div>
-      <div className="flex justify-between text-xs text-white/40 px-1">
+      <div className="flex justify-between text-xs text-keepit-dark/40 px-1">
         <span>Pessimo</span>
         <span>Excelente</span>
       </div>
@@ -70,8 +71,8 @@ function MultipleChoiceInput({
           onClick={() => onChange(opt.value)}
           className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
             value === opt.value
-              ? "bg-[#66FB95] text-black scale-105"
-              : "bg-white/10 text-white/70 hover:bg-white/20"
+              ? "bg-keepit-brand text-white scale-105"
+              : "bg-keepit-dark/5 text-keepit-dark/60 hover:bg-keepit-dark/10"
           }`}
         >
           {opt.label}
@@ -168,7 +169,6 @@ export default function PesquisaPage() {
     }
 
     if (isLastQuestion) {
-      // Submit
       setState("submitting");
       try {
         const res = await fetch("/api/pesquisa/submit", {
@@ -199,25 +199,21 @@ export default function PesquisaPage() {
     if (currentQ > 0) setCurrentQ((prev) => prev - 1);
   };
 
-  const setAnswer = (value: string | number) => {
+  const setAnswer = (value: string | number, autoAdvance = false) => {
     if (!question) return;
     setAnswers((prev) => ({ ...prev, [question.id]: value }));
+    if (autoAdvance && !isLastQuestion) {
+      setTimeout(() => setCurrentQ((prev) => prev + 1), 250);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-white flex flex-col">
+    <div className="min-h-screen bg-[#F8FAF9]">
       <Toaster position="top-center" />
 
-      <header className="text-center pt-8 pb-4 px-4">
-        <h1 className="text-3xl font-black tracking-tight">
-          <span className="text-[#66FB95]">KEEPIT</span> CARNAVAL
-        </h1>
-        <p className="text-white/50 text-sm mt-1">
-          Avalie sua experiencia e ganhe um brinde!
-        </p>
-      </header>
+      <SharedHeader title="Pesquisa" badge="Carnaval 2026" showBack={false} />
 
-      <main className="flex-1 flex items-center justify-center px-4 pb-8">
+      <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
         <AnimatePresence mode="wait">
           {/* REGISTER */}
           {state === "register" && (
@@ -229,11 +225,11 @@ export default function PesquisaPage() {
               className="w-full max-w-sm space-y-5"
             >
               <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-[#66FB95]/20 flex items-center justify-center mx-auto mb-3">
-                  <ClipboardList className="w-8 h-8 text-[#66FB95]" />
+                <div className="w-16 h-16 rounded-2xl bg-keepit-brand/15 flex items-center justify-center mx-auto mb-3">
+                  <ClipboardList className="w-8 h-8 text-keepit-brand" />
                 </div>
-                <h2 className="text-xl font-bold">Preencha seus dados</h2>
-                <p className="text-white/50 text-sm mt-1">
+                <h2 className="text-xl font-black tracking-tight text-keepit-dark">Preencha seus dados</h2>
+                <p className="text-keepit-dark/50 text-sm mt-1">
                   para participar da pesquisa
                 </p>
               </div>
@@ -243,21 +239,21 @@ export default function PesquisaPage() {
                   placeholder="Seu nome completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
                 <Input
                   type="email"
                   placeholder="Seu email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
                 <Input
                   type="tel"
                   placeholder="(XX) XXXXX-XXXX"
                   value={phone}
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
               </div>
 
@@ -266,9 +262,9 @@ export default function PesquisaPage() {
                   type="checkbox"
                   checked={lgpd}
                   onChange={(e) => setLgpd(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-white/30 accent-[#66FB95]"
+                  className="mt-1 h-4 w-4 rounded border-keepit-dark/20 accent-keepit-brand"
                 />
-                <span className="text-xs text-white/60 leading-relaxed">
+                <span className="text-xs text-keepit-dark/50 leading-relaxed">
                   Concordo com os termos de uso e politica de privacidade. Meus
                   dados serao usados exclusivamente para esta pesquisa.
                 </span>
@@ -277,7 +273,7 @@ export default function PesquisaPage() {
               <Button
                 onClick={handleRegister}
                 disabled={isSubmitting}
-                className="w-full h-12 bg-[#66FB95] text-black font-bold hover:bg-[#52e080] rounded-xl text-base"
+                className="btn-pill btn-pill-primary w-full h-12 text-base"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -300,16 +296,16 @@ export default function PesquisaPage() {
               {/* Progress */}
               <div className="w-full">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-white/50">
+                  <span className="text-sm text-keepit-dark/50">
                     Pergunta {currentQ + 1} de {SURVEY_QUESTIONS.length}
                   </span>
-                  <span className="text-sm text-[#66FB95] font-bold">
+                  <span className="text-sm text-keepit-brand font-bold">
                     {Math.round(((currentQ + 1) / SURVEY_QUESTIONS.length) * 100)}%
                   </span>
                 </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-keepit-dark/5 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-[#66FB95] rounded-full"
+                    className="h-full bg-keepit-brand rounded-full"
                     initial={{ width: 0 }}
                     animate={{
                       width: `${((currentQ + 1) / SURVEY_QUESTIONS.length) * 100}%`,
@@ -321,11 +317,11 @@ export default function PesquisaPage() {
 
               {/* Question */}
               <div className="text-center">
-                <h2 className="text-lg font-bold leading-snug">
+                <h2 className="text-lg font-black tracking-tight leading-snug text-keepit-dark">
                   {question.text}
                 </h2>
                 {!question.required && (
-                  <p className="text-white/40 text-xs mt-1">(opcional)</p>
+                  <p className="text-keepit-dark/40 text-xs mt-1">(opcional)</p>
                 )}
               </div>
 
@@ -334,14 +330,14 @@ export default function PesquisaPage() {
                 {question.type === "rating" && (
                   <RatingInput
                     value={currentAnswer !== undefined ? (currentAnswer as number) : -1}
-                    onChange={(v) => setAnswer(v)}
+                    onChange={(v) => setAnswer(v, true)}
                   />
                 )}
                 {question.type === "multiple_choice" && (
                   <MultipleChoiceInput
                     question={question}
                     value={(currentAnswer as string) || ""}
-                    onChange={(v) => setAnswer(v)}
+                    onChange={(v) => setAnswer(v, true)}
                   />
                 )}
                 {question.type === "text" && (
@@ -349,7 +345,7 @@ export default function PesquisaPage() {
                     placeholder="Digite sua resposta..."
                     value={(currentAnswer as string) || ""}
                     onChange={(e) => setAnswer(e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-[100px] resize-none"
+                    className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 min-h-[100px] resize-none rounded-xl"
                   />
                 )}
               </div>
@@ -360,7 +356,7 @@ export default function PesquisaPage() {
                   <Button
                     onClick={handleBack}
                     variant="outline"
-                    className="flex-1 h-12 border-white/20 text-white hover:bg-white/10 rounded-xl"
+                    className="flex-1 h-12 border-keepit-dark/15 text-keepit-dark bg-white hover:bg-keepit-dark/5 rounded-full"
                     disabled={state === "submitting"}
                   >
                     Voltar
@@ -372,7 +368,7 @@ export default function PesquisaPage() {
                     state === "submitting" ||
                     (question.required && !canProceed)
                   }
-                  className="flex-1 h-12 bg-[#66FB95] text-black font-bold hover:bg-[#52e080] rounded-xl text-base"
+                  className="btn-pill btn-pill-primary flex-1 h-12 text-base"
                 >
                   {state === "submitting" ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -400,12 +396,12 @@ export default function PesquisaPage() {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
               >
-                <PartyPopper className="w-16 h-16 text-[#66FB95]" />
+                <PartyPopper className="w-16 h-16 text-keepit-brand" />
               </motion.div>
 
               <div>
-                <h2 className="text-2xl font-black">Obrigado!</h2>
-                <p className="text-white/60 mt-1">
+                <h2 className="text-2xl font-black text-keepit-dark">Obrigado!</h2>
+                <p className="text-keepit-dark/50 mt-1">
                   Sua opiniao e muito importante para nos
                 </p>
               </div>
@@ -414,16 +410,16 @@ export default function PesquisaPage() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="rounded-2xl p-6 w-full bg-[#66FB95]/10 border-2 border-[#66FB95]/30"
+                className="card-keepit p-6 w-full bg-keepit-brand/10 border-2 border-keepit-brand/20"
               >
                 <span className="text-5xl block mb-3">{SURVEY_PRIZE.emoji}</span>
-                <h3 className="text-2xl font-black text-[#66FB95]">
+                <h3 className="text-2xl font-black text-keepit-brand">
                   {SURVEY_PRIZE.name}
                 </h3>
               </motion.div>
 
-              <div className="bg-white/10 rounded-xl p-4 w-full">
-                <p className="text-sm text-white/80">{SURVEY_PRIZE.description}</p>
+              <div className="card-keepit p-4 w-full">
+                <p className="text-sm text-keepit-dark/70">{SURVEY_PRIZE.description}</p>
               </div>
             </motion.div>
           )}

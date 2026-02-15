@@ -6,11 +6,12 @@ import { Toaster, toast } from "sonner";
 import { PartyPopper, Loader2, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SharedHeader } from "@/components/shared-header";
 
 // Prize config (client-side copy for wheel rendering — no probabilities exposed)
 const WHEEL_PRIZES = [
-  { slug: "chaveiro",    name: "Chaveiro Keepit",     color: "#66FB95", emoji: "🔑" },
-  { slug: "adesivo",     name: "Adesivo Keepit",      color: "#34BF58", emoji: "🏷️" },
+  { slug: "chaveiro",    name: "Chaveiro Keepit",     color: "#34BF58", emoji: "🔑" },
+  { slug: "adesivo",     name: "Adesivo Keepit",      color: "#66FB95", emoji: "🏷️" },
   { slug: "copo",        name: "Copo Personalizado",  color: "#FFD700", emoji: "🥤" },
   { slug: "desconto-20", name: "Desconto 20% Keepit", color: "#FF6B6B", emoji: "💰" },
   { slug: "ecobag",      name: "Ecobag Keepit",       color: "#4ECDC4", emoji: "👜" },
@@ -124,19 +125,14 @@ export default function RoletaPage() {
       const prize = data.prize as SpinResult;
       setResult(prize);
 
-      // Calculate rotation to land on the correct prize
       const prizeIndex = WHEEL_PRIZES.findIndex((p) => p.slug === prize.slug);
       const segmentAngle = 360 / WHEEL_PRIZES.length;
-      // Target angle: center of the winning segment (top = 0 degrees)
-      // We want the prize at the top (12 o'clock / pointer position)
       const targetAngle = 360 - (prizeIndex * segmentAngle + segmentAngle / 2);
-      // Add extra full rotations for drama
-      const extraSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full rotations
+      const extraSpins = 5 + Math.floor(Math.random() * 3);
       const totalRotation = rotation + extraSpins * 360 + targetAngle + (Math.random() * 10 - 5);
 
       setRotation(totalRotation);
 
-      // Wait for animation to complete then show result
       setTimeout(() => {
         setState("result");
       }, 4500);
@@ -150,18 +146,12 @@ export default function RoletaPage() {
   const winningPrize = result ? WHEEL_PRIZES.find((p) => p.slug === result.slug) : null;
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-white flex flex-col">
+    <div className="min-h-screen bg-[#F8FAF9]">
       <Toaster position="top-center" />
 
-      {/* Header */}
-      <header className="text-center pt-8 pb-4 px-4">
-        <h1 className="text-3xl font-black tracking-tight">
-          <span className="text-[#66FB95]">KEEPIT</span> CARNAVAL
-        </h1>
-        <p className="text-white/50 text-sm mt-1">Gire a roleta e ganhe um brinde!</p>
-      </header>
+      <SharedHeader title="Roleta" badge="Carnaval 2026" showBack={false} />
 
-      <main className="flex-1 flex items-center justify-center px-4 pb-8">
+      <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
         <AnimatePresence mode="wait">
           {/* REGISTER */}
           {state === "register" && (
@@ -173,11 +163,11 @@ export default function RoletaPage() {
               className="w-full max-w-sm space-y-5"
             >
               <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-[#66FB95]/20 flex items-center justify-center mx-auto mb-3">
-                  <Gift className="w-8 h-8 text-[#66FB95]" />
+                <div className="w-16 h-16 rounded-2xl bg-keepit-brand/15 flex items-center justify-center mx-auto mb-3">
+                  <Gift className="w-8 h-8 text-keepit-brand" />
                 </div>
-                <h2 className="text-xl font-bold">Preencha seus dados</h2>
-                <p className="text-white/50 text-sm mt-1">para girar a roleta de premios</p>
+                <h2 className="text-xl font-black tracking-tight text-keepit-dark">Preencha seus dados</h2>
+                <p className="text-keepit-dark/50 text-sm mt-1">para girar a roleta de premios</p>
               </div>
 
               <div className="space-y-3">
@@ -185,21 +175,21 @@ export default function RoletaPage() {
                   placeholder="Seu nome completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
                 <Input
                   type="email"
                   placeholder="Seu email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
                 <Input
                   type="tel"
                   placeholder="(XX) XXXXX-XXXX"
                   value={phone}
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-12"
+                  className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
                 />
               </div>
 
@@ -208,9 +198,9 @@ export default function RoletaPage() {
                   type="checkbox"
                   checked={lgpd}
                   onChange={(e) => setLgpd(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-white/30 accent-[#66FB95]"
+                  className="mt-1 h-4 w-4 rounded border-keepit-dark/20 accent-keepit-brand"
                 />
-                <span className="text-xs text-white/60 leading-relaxed">
+                <span className="text-xs text-keepit-dark/50 leading-relaxed">
                   Concordo com os termos de uso e politica de privacidade. Meus dados serao usados exclusivamente para esta promocao.
                 </span>
               </label>
@@ -218,7 +208,7 @@ export default function RoletaPage() {
               <Button
                 onClick={handleRegister}
                 disabled={isSubmitting}
-                className="w-full h-12 bg-[#66FB95] text-black font-bold hover:bg-[#52e080] rounded-xl text-base"
+                className="btn-pill btn-pill-primary w-full h-12 text-base"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -238,21 +228,21 @@ export default function RoletaPage() {
               exit={{ opacity: 0, scale: 0.9 }}
               className="w-full max-w-sm flex flex-col items-center gap-6"
             >
-              <p className="text-lg font-bold">
-                Ola, <span className="text-[#66FB95]">{leadName.split(" ")[0]}</span>!
+              <p className="text-lg font-black text-keepit-dark">
+                Ola, <span className="text-keepit-brand">{leadName.split(" ")[0]}</span>!
               </p>
 
               {/* Wheel container */}
               <div className="relative w-72 h-72 sm:w-80 sm:h-80">
                 {/* Pointer (top center) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-                  <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-white drop-shadow-lg" />
+                  <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-keepit-dark drop-shadow-lg" />
                 </div>
 
                 {/* Wheel */}
                 <motion.div
                   ref={wheelRef}
-                  className="w-full h-full rounded-full border-4 border-white/20 overflow-hidden shadow-[0_0_40px_rgba(102,251,149,0.3)]"
+                  className="w-full h-full rounded-full border-4 border-keepit-dark/10 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.08)]"
                   animate={{ rotate: rotation }}
                   transition={{
                     duration: state === "spinning" ? 4 : 0,
@@ -262,7 +252,7 @@ export default function RoletaPage() {
                   <svg viewBox="0 0 200 200" className="w-full h-full">
                     {WHEEL_PRIZES.map((prize, i) => {
                       const segAngle = 360 / WHEEL_PRIZES.length;
-                      const startAngle = i * segAngle - 90; // -90 to start from top
+                      const startAngle = i * segAngle - 90;
                       const endAngle = startAngle + segAngle;
                       const startRad = (startAngle * Math.PI) / 180;
                       const endRad = (endAngle * Math.PI) / 180;
@@ -272,7 +262,6 @@ export default function RoletaPage() {
                       const y2 = 100 + 100 * Math.sin(endRad);
                       const largeArc = segAngle > 180 ? 1 : 0;
 
-                      // Text position (middle of segment)
                       const midAngle = ((startAngle + endAngle) / 2 * Math.PI) / 180;
                       const textX = 100 + 60 * Math.cos(midAngle);
                       const textY = 100 + 60 * Math.sin(midAngle);
@@ -283,8 +272,8 @@ export default function RoletaPage() {
                           <path
                             d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc},1 ${x2},${y2} Z`}
                             fill={prize.color}
-                            stroke="rgba(0,0,0,0.15)"
-                            strokeWidth="0.5"
+                            stroke="rgba(255,255,255,0.5)"
+                            strokeWidth="1"
                           />
                           <text
                             x={textX}
@@ -310,8 +299,8 @@ export default function RoletaPage() {
                       );
                     })}
                     {/* Center circle */}
-                    <circle cx="100" cy="100" r="18" fill="#1a1a2e" stroke="white" strokeWidth="2" />
-                    <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" className="text-[8px] font-black fill-[#66FB95]">
+                    <circle cx="100" cy="100" r="18" fill="white" stroke="#1A1A1A" strokeWidth="2" />
+                    <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" className="text-[8px] font-black fill-keepit-brand">
                       KEEPIT
                     </text>
                   </svg>
@@ -322,7 +311,7 @@ export default function RoletaPage() {
               <Button
                 onClick={handleSpin}
                 disabled={state === "spinning"}
-                className="w-48 h-14 bg-[#66FB95] text-black font-black text-lg hover:bg-[#52e080] rounded-full shadow-[0_0_20px_rgba(102,251,149,0.4)]"
+                className="btn-pill btn-pill-primary w-48 h-14 text-lg font-black shadow-[0_4px_20px_rgba(52,191,88,0.3)]"
               >
                 {state === "spinning" ? (
                   <Loader2 className="w-6 h-6 animate-spin" />
@@ -347,20 +336,20 @@ export default function RoletaPage() {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
               >
-                <PartyPopper className="w-16 h-16 text-[#66FB95]" />
+                <PartyPopper className="w-16 h-16 text-keepit-brand" />
               </motion.div>
 
               <div>
-                <h2 className="text-2xl font-black">Parabens!</h2>
-                <p className="text-white/60 mt-1">Voce ganhou:</p>
+                <h2 className="text-2xl font-black text-keepit-dark">Parabens!</h2>
+                <p className="text-keepit-dark/50 mt-1">Voce ganhou:</p>
               </div>
 
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="rounded-2xl p-6 w-full"
-                style={{ backgroundColor: `${winningPrize.color}20`, border: `2px solid ${winningPrize.color}40` }}
+                className="card-keepit p-6 w-full"
+                style={{ backgroundColor: `${winningPrize.color}15`, border: `2px solid ${winningPrize.color}30` }}
               >
                 <span className="text-5xl block mb-3">{winningPrize.emoji}</span>
                 <h3 className="text-2xl font-black" style={{ color: winningPrize.color }}>
@@ -368,8 +357,8 @@ export default function RoletaPage() {
                 </h3>
               </motion.div>
 
-              <div className="bg-white/10 rounded-xl p-4 w-full">
-                <p className="text-sm text-white/80">
+              <div className="card-keepit p-4 w-full">
+                <p className="text-sm text-keepit-dark/70">
                   Mostre esta tela para nossa equipe no stand para retirar seu brinde!
                 </p>
               </div>
