@@ -36,7 +36,9 @@ export function ResultGallery({
   async function handleDownload(url: string) {
     setIsDownloading(true);
     try {
-      const response = await fetch(url);
+      // Use proxy API to avoid CORS issues with Supabase Storage
+      const proxyUrl = `/api/ai-photo/download?url=${encodeURIComponent(url)}`;
+      const response = await fetch(proxyUrl);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
