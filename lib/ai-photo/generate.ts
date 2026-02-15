@@ -94,9 +94,10 @@ export async function createGeneration(
     `Transform this photo: ONLY change the person's clothing to ${randomStyle}.`,
     "IMPORTANT RULES FOR THE COSTUME: The outfit must provide FULL BODY COVERAGE appropriate for a family event — no exposed chest, no exposed midriff, no revealing cuts. The costume should be elaborate, colorful and glamorous while being fully covered and dignified.",
     "Automatically detect if the person is male or female and adapt the costume style accordingly — masculine cuts for men, feminine cuts for women.",
-    "DO NOT CHANGE ANYTHING ELSE: Keep EXACTLY the same face, facial expression, skin tone, hair, body pose, body position, body proportions, and background/environment. The ONLY change should be the clothing and accessories.",
+    "DO NOT CHANGE ANYTHING ELSE: Keep EXACTLY the same face, facial expression, skin tone, hair, body pose, body position, and body proportions. The ONLY change should be the clothing, accessories, and background.",
     "ACCESSORIES: If the person is wearing glasses, sunglasses, hat, cap, or any accessory, KEEP the accessory but transform its style to match the carnival costume — e.g. regular glasses become jeweled carnival glasses, a cap becomes a feathered headpiece, sunglasses get glitter frames.",
-    "The result must be photorealistic, matching the original photo's lighting and environment exactly.",
+    "CHANGE THE BACKGROUND: place the person in the Sambódromo do Anhembi in São Paulo during carnival night, with colorful lights, confetti in the air, crowd in the bleachers, and the carnival parade avenue visible behind them.",
+    "The result must be photorealistic with proper lighting matching a nighttime carnival atmosphere with vibrant stage lights.",
     "High quality, 8K resolution.",
   ].join(" ");
 
