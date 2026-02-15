@@ -46,7 +46,7 @@ function RatingInput({
         ))}
       </div>
       <div className="flex justify-between text-xs text-keepit-dark/40 px-1">
-        <span>Pessimo</span>
+        <span>Péssimo</span>
         <span>Excelente</span>
       </div>
     </div>
@@ -106,16 +106,16 @@ export default function PesquisaPage() {
       return;
     }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Email invalido");
+      toast.error("Email inválido");
       return;
     }
     const cleanPhone = phone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      toast.error("Telefone invalido (inclua o DDD)");
+      toast.error("Telefone inválido (inclua o DDD)");
       return;
     }
     if (!lgpd) {
-      toast.error("Voce precisa aceitar os termos");
+      toast.error("Você precisa aceitar os termos");
       return;
     }
 
@@ -148,7 +148,7 @@ export default function PesquisaPage() {
         setState("survey");
       }
     } catch {
-      toast.error("Erro de conexao. Tente novamente.");
+      toast.error("Erro de conexão. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -187,7 +187,7 @@ export default function PesquisaPage() {
 
         setState("result");
       } catch {
-        toast.error("Erro de conexao. Tente novamente.");
+        toast.error("Erro de conexão. Tente novamente.");
         setState("survey");
       }
     } else {
@@ -265,8 +265,8 @@ export default function PesquisaPage() {
                   className="mt-1 h-4 w-4 rounded border-keepit-dark/20 accent-keepit-brand"
                 />
                 <span className="text-xs text-keepit-dark/50 leading-relaxed">
-                  Concordo com os termos de uso e politica de privacidade. Meus
-                  dados serao usados exclusivamente para esta pesquisa.
+                  Concordo com os termos de uso e política de privacidade. Meus
+                  dados serão usados exclusivamente para esta pesquisa.
                 </span>
               </label>
 
@@ -278,7 +278,7 @@ export default function PesquisaPage() {
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  "Comecar"
+                  "Começar"
                 )}
               </Button>
             </motion.div>
@@ -375,7 +375,7 @@ export default function PesquisaPage() {
                   ) : isLastQuestion ? (
                     "Enviar"
                   ) : (
-                    "Proximo"
+                    "Próximo"
                   )}
                 </Button>
               </div>
@@ -402,7 +402,7 @@ export default function PesquisaPage() {
               <div>
                 <h2 className="text-2xl font-black text-keepit-dark">Obrigado!</h2>
                 <p className="text-keepit-dark/50 mt-1">
-                  Sua opiniao e muito importante para nos
+                  Sua opinião é muito importante para nós
                 </p>
               </div>
 

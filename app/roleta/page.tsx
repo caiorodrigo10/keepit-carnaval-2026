@@ -65,16 +65,16 @@ export default function RoletaPage() {
       return;
     }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Email invalido");
+      toast.error("Email inválido");
       return;
     }
     const cleanPhone = phone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      toast.error("Telefone invalido (inclua o DDD)");
+      toast.error("Telefone inválido (inclua o DDD)");
       return;
     }
     if (!lgpd) {
-      toast.error("Voce precisa aceitar os termos");
+      toast.error("Você precisa aceitar os termos");
       return;
     }
 
@@ -103,7 +103,7 @@ export default function RoletaPage() {
         setState("wheel");
       }
     } catch {
-      toast.error("Erro de conexao. Tente novamente.");
+      toast.error("Erro de conexão. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +145,7 @@ export default function RoletaPage() {
         setState("result");
       }, 4500);
     } catch {
-      toast.error("Erro de conexao. Tente novamente.");
+      toast.error("Erro de conexão. Tente novamente.");
       setState("wheel");
     }
   }, [leadId, rotation]);
@@ -209,7 +209,7 @@ export default function RoletaPage() {
                   className="mt-1 h-4 w-4 rounded border-keepit-dark/20 accent-keepit-brand"
                 />
                 <span className="text-xs text-keepit-dark/50 leading-relaxed">
-                  Concordo com os termos de uso e politica de privacidade. Meus dados serao usados exclusivamente para esta promocao.
+                  Concordo com os termos de uso e política de privacidade. Meus dados serão usados exclusivamente para esta promoção.
                 </span>
               </label>
 
@@ -348,8 +348,8 @@ export default function RoletaPage() {
               </motion.div>
 
               <div>
-                <h2 className="text-2xl font-black text-keepit-dark">Parabens!</h2>
-                <p className="text-keepit-dark/50 mt-1">Voce ganhou:</p>
+                <h2 className="text-2xl font-black text-keepit-dark">Parabéns!</h2>
+                <p className="text-keepit-dark/50 mt-1">Você ganhou:</p>
               </div>
 
               <motion.div

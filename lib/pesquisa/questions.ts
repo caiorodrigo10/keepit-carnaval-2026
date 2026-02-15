@@ -16,7 +16,7 @@ export interface Question {
 export const SURVEY_QUESTIONS: Question[] = [
   {
     id: "evento_geral",
-    text: "Como voce avalia o evento no geral?",
+    text: "Como você avalia o evento no geral?",
     type: "rating",
     required: true,
   },
@@ -28,7 +28,7 @@ export const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: "organizacao",
-    text: "Organizacao interna",
+    text: "Organização interna",
     type: "rating",
     required: true,
   },
@@ -46,19 +46,19 @@ export const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: "alimentacao",
-    text: "Alimentacao e bebida",
+    text: "Alimentação e bebida",
     type: "rating",
     required: true,
   },
   {
     id: "precos",
-    text: "Preco das coisas dentro do evento",
+    text: "Preço das coisas dentro do evento",
     type: "rating",
     required: true,
   },
   {
     id: "seguranca",
-    text: "Seguranca",
+    text: "Segurança",
     type: "rating",
     required: true,
   },
@@ -70,18 +70,18 @@ export const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: "experiencia_carnaval",
-    text: "Experiencia do carnaval em si",
+    text: "Experiência do carnaval em si",
     type: "rating",
     required: true,
   },
   {
     id: "voltaria",
-    text: "Voce voltaria no proximo ano?",
+    text: "Você voltaria no próximo ano?",
     type: "multiple_choice",
     options: [
       { value: "sim", label: "Sim" },
       { value: "talvez", label: "Talvez" },
-      { value: "nao", label: "Nao" },
+      { value: "nao", label: "Não" },
     ],
     required: true,
   },
