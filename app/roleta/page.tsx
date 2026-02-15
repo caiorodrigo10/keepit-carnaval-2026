@@ -237,7 +237,7 @@ export default function RoletaPage() {
               className="w-full max-w-sm flex flex-col items-center gap-6"
             >
               <p className="text-lg font-black text-keepit-dark">
-                Ola, <span className="text-keepit-brand">{leadName.split(" ")[0]}</span>!
+                Olá, <span className="text-keepit-brand">{leadName.split(" ")[0]}</span>!
               </p>
 
               {/* Wheel container */}
@@ -270,10 +270,21 @@ export default function RoletaPage() {
                       const y2 = 100 + 100 * Math.sin(endRad);
                       const largeArc = segAngle > 180 ? 1 : 0;
 
-                      const midAngle = ((startAngle + endAngle) / 2 * Math.PI) / 180;
-                      const textX = 100 + 60 * Math.cos(midAngle);
-                      const textY = 100 + 60 * Math.sin(midAngle);
-                      const textRotation = (startAngle + endAngle) / 2 + 90;
+                      const midAngleDeg = (startAngle + endAngle) / 2;
+                      const midAngleRad = (midAngleDeg * Math.PI) / 180;
+
+                      // Flip text on left half so it stays readable
+                      const norm = ((midAngleDeg % 360) + 360) % 360;
+                      const flip = norm > 90 && norm < 270;
+                      const textRot = flip ? midAngleDeg + 180 : midAngleDeg;
+
+                      // Emoji near outer edge, name in middle of segment
+                      const emojiR = 80;
+                      const nameR = 55;
+                      const emojiX = 100 + emojiR * Math.cos(midAngleRad);
+                      const emojiY = 100 + emojiR * Math.sin(midAngleRad);
+                      const nameX = 100 + nameR * Math.cos(midAngleRad);
+                      const nameY = 100 + nameR * Math.sin(midAngleRad);
 
                       return (
                         <g key={prize.slug}>
@@ -284,22 +295,22 @@ export default function RoletaPage() {
                             strokeWidth="1"
                           />
                           <text
-                            x={textX}
-                            y={textY}
+                            x={emojiX}
+                            y={emojiY}
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            transform={`rotate(${textRotation}, ${textX}, ${textY})`}
-                            className="text-[7px] font-bold fill-black/80"
+                            transform={`rotate(${textRot}, ${emojiX}, ${emojiY})`}
+                            className="text-[6px] fill-black/80"
                           >
                             {prize.emoji}
                           </text>
                           <text
-                            x={textX}
-                            y={textY + 9}
+                            x={nameX}
+                            y={nameY}
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            transform={`rotate(${textRotation}, ${textX}, ${textY + 9})`}
-                            className="text-[4.5px] font-semibold fill-black/70"
+                            transform={`rotate(${textRot}, ${nameX}, ${nameY})`}
+                            className="text-[3.8px] font-bold fill-black/80"
                           >
                             {prize.name.length > 14 ? prize.name.slice(0, 14) + "…" : prize.name}
                           </text>

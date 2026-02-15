@@ -41,7 +41,15 @@ export async function POST(request: Request) {
 
     if (existing) {
       leadId = existing.id;
-      leadName = existing.name;
+      leadName = body.name.trim();
+
+      // Update name if changed
+      if (existing.name !== body.name.trim()) {
+        await supabase
+          .from("leads")
+          .update({ name: body.name.trim() })
+          .eq("id", leadId);
+      }
 
       // Check if already answered survey
       const { data: survey } = await supabase
