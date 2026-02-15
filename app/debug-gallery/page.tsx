@@ -273,6 +273,7 @@ function DownloadTab({ password }: { password: string }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [deleting, setDeleting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -283,7 +284,12 @@ function DownloadTab({ password }: { password: string }) {
     try {
       const res = await fetch(`/api/debug-gallery?page=${pageNum}&per_page=30&outputs_only=true`, { headers: { "x-password": password } });
       const d: OutputsResponse = await res.json();
-      setPhotos((prev) => isFirst ? d.generations : [...prev, ...d.generations]);
+      setPhotos((prev) => {
+        if (isFirst) return d.generations;
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newPhotos = d.generations.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...newPhotos];
+      });
       setTotal(d.total);
       setHasMore(pageNum < d.totalPages);
     } catch {
@@ -375,6 +381,30 @@ function DownloadTab({ password }: { password: string }) {
     setDownloadProgress(0);
   }, [photos, selected]);
 
+  const handleDelete = useCallback(async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Tem certeza que deseja apagar ${selected.size} foto${selected.size > 1 ? "s" : ""}? Essa ação não pode ser desfeita.`)) return;
+
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/debug-gallery", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", "x-password": password },
+        body: JSON.stringify({ ids: Array.from(selected) }),
+      });
+
+      if (res.ok) {
+        setPhotos((prev) => prev.filter((p) => !selected.has(p.id)));
+        setTotal((prev) => prev - selected.size);
+        setSelected(new Set());
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeleting(false);
+    }
+  }, [selected, password]);
+
   const allLoaded = photos.length > 0;
   const allSelected = allLoaded && photos.every((g) => selected.has(g.id));
 
@@ -413,6 +443,21 @@ function DownloadTab({ password }: { password: string }) {
             }}
           >
             {allSelected ? "Desmarcar tudo" : "Selecionar tudo"}
+          </button>
+
+          <button
+            onClick={handleDelete}
+            disabled={selected.size === 0 || deleting || downloading}
+            style={{
+              padding: "8px 20px", borderRadius: "9999px", border: "1px solid #ff4444",
+              background: selected.size === 0 ? "transparent" : "#ff444420",
+              color: selected.size === 0 ? "#555" : "#ff4444",
+              fontSize: "13px", fontWeight: 700,
+              cursor: selected.size === 0 || deleting ? "default" : "pointer",
+              opacity: deleting ? 0.7 : 1,
+            }}
+          >
+            {deleting ? "Apagando..." : `Apagar${selected.size > 0 ? ` (${selected.size})` : ""}`}
           </button>
 
           <button

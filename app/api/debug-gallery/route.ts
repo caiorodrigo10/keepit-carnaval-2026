@@ -11,6 +11,51 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
+export async function DELETE(request: Request) {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Operação disponível apenas em ambiente local" }, { status: 403 });
+  }
+
+  const pw = request.headers.get("x-password");
+  if (pw !== DASHBOARD_PASSWORD) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const { ids } = await request.json();
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return NextResponse.json({ error: "IDs obrigatórios" }, { status: 400 });
+  }
+
+  const supabase = createServiceClient();
+
+  // Also delete files from storage
+  for (const id of ids) {
+    const { data: gen } = await supabase
+      .from("ai_photo_generations")
+      .select("variant_1_url")
+      .eq("id", id)
+      .single();
+
+    if (gen?.variant_1_url) {
+      const path = gen.variant_1_url.split("/ai-photos/").pop();
+      if (path) {
+        await supabase.storage.from("ai-photos").remove([path]);
+      }
+    }
+  }
+
+  const { error } = await supabase
+    .from("ai_photo_generations")
+    .delete()
+    .in("id", ids);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ deleted: ids.length });
+}
+
 export async function GET(request: Request) {
   const pw = request.headers.get("x-password");
   if (pw !== DASHBOARD_PASSWORD) {
