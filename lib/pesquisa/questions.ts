@@ -106,7 +106,7 @@ export const SURVEY_QUESTIONS: Question[] = [
 ];
 
 export const SURVEY_PRIZE = {
-  name: "Adesivo Exclusivo Keepit",
-  emoji: "🎉",
-  description: "Retire seu brinde no stand da Keepit!",
+  name: "Brinde Surpresa",
+  emoji: "🎁",
+  description: "Retire seu brinde surpresa no stand da Keepit! Mostre esta tela para nossa equipe.",
 };

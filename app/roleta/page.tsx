@@ -10,11 +10,19 @@ import { SharedHeader } from "@/components/shared-header";
 
 // Prize config (client-side copy for wheel rendering — no probabilities exposed)
 const WHEEL_PRIZES = [
-  { slug: "chaveiro",    name: "Chaveiro Keepit",     color: "#34BF58", emoji: "🔑" },
-  { slug: "adesivo",     name: "Adesivo Keepit",      color: "#66FB95", emoji: "🏷️" },
-  { slug: "copo",        name: "Copo Personalizado",  color: "#FFD700", emoji: "🥤" },
-  { slug: "desconto-20", name: "Desconto 20% Keepit", color: "#FF6B6B", emoji: "💰" },
-  { slug: "ecobag",      name: "Ecobag Keepit",       color: "#4ECDC4", emoji: "👜" },
+  { slug: "carregador",        name: "Carregador Portátil",  color: "#34BF58", emoji: "🔋" },
+  { slug: "capa-chuva",        name: "Capa de Chuva",        color: "#4ECDC4", emoji: "🌧️" },
+  { slug: "energy-now",        name: "Energy Now",           color: "#FFD700", emoji: "⚡" },
+  { slug: "kit-glitter",       name: "Kit Glitter",          color: "#FF69B4", emoji: "✨" },
+  { slug: "alcool-gel",        name: "Álcool Gel",           color: "#66FB95", emoji: "🧴" },
+  { slug: "rexona",            name: "Rexona Clinical",      color: "#5B9BD5", emoji: "🧊" },
+  { slug: "kit-camisinha",     name: "Kit c/ Óculos",        color: "#FF6B6B", emoji: "🕶️" },
+  { slug: "hype-glow",         name: "Hype Glow Rosto",     color: "#E040FB", emoji: "💎" },
+  { slug: "hidratante-labial", name: "Nivea Lip Balm",       color: "#1E88E5", emoji: "💋" },
+  { slug: "glitter-corporal",  name: "Glitter Corporal",     color: "#AB47BC", emoji: "🌟" },
+  { slug: "arquinho",          name: "Arquinho Colorido",    color: "#FF7043", emoji: "🎀" },
+  { slug: "prendedor",         name: "Prendedor Cabelo",     color: "#8D6E63", emoji: "💇" },
+  { slug: "orelha-brilhosa",   name: "Orelha Brilhosa",     color: "#FFC107", emoji: "👂" },
 ];
 
 type PageState = "register" | "wheel" | "spinning" | "result";
