@@ -484,18 +484,24 @@ export interface Database {
           lead_id: string;
           answers: Record<string, string | number>;
           created_at: string;
+          prize_slug: string | null;
+          prize_name: string | null;
         };
         Insert: {
           id?: string;
           lead_id: string;
           answers: Record<string, string | number>;
           created_at?: string;
+          prize_slug?: string | null;
+          prize_name?: string | null;
         };
         Update: {
           id?: string;
           lead_id?: string;
           answers?: Record<string, string | number>;
           created_at?: string;
+          prize_slug?: string | null;
+          prize_name?: string | null;
         };
         Relationships: [
           {
@@ -506,6 +512,30 @@ export interface Database {
             referencedColumns: ["id"];
           }
         ];
+      };
+      franchise_leads: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          phone?: string;
+          created_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {
@@ -553,3 +583,4 @@ export type BlockedUser = Tables<"blocked_users">;
 export type AiPhotoTemplate = Tables<"ai_photo_templates">;
 export type AiPhotoGeneration = Tables<"ai_photo_generations">;
 export type SurveyResponse = Tables<"survey_responses">;
+export type FranchiseLead = Tables<"franchise_leads">;

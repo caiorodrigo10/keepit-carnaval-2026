@@ -8,10 +8,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SharedHeader } from "@/components/shared-header";
-import { SURVEY_QUESTIONS, SURVEY_PRIZE } from "@/lib/pesquisa/questions";
+import { SURVEY_QUESTIONS } from "@/lib/pesquisa/questions";
 import type { Question } from "@/lib/pesquisa/questions";
 
 type PageState = "register" | "survey" | "submitting" | "result";
+
+interface PrizeResult {
+  slug: string;
+  name: string;
+  emoji?: string;
+  color?: string;
+}
+
+// Client-side prize display data (matches lib/roleta/prizes.ts)
+const PRIZE_DISPLAY: Record<string, { emoji: string; color: string }> = {
+  "carregador":        { emoji: "🔋", color: "#34BF58" },
+  "capa-chuva":        { emoji: "🌧️", color: "#4ECDC4" },
+  "energy-now":        { emoji: "⚡", color: "#FFD700" },
+  "kit-glitter":       { emoji: "✨", color: "#FF69B4" },
+  "alcool-gel":        { emoji: "🧴", color: "#66FB95" },
+  "rexona":            { emoji: "🧊", color: "#5B9BD5" },
+  "kit-camisinha":     { emoji: "🕶️", color: "#FF6B6B" },
+  "hype-glow":         { emoji: "💎", color: "#E040FB" },
+  "hidratante-labial": { emoji: "💋", color: "#1E88E5" },
+  "glitter-corporal":  { emoji: "🌟", color: "#AB47BC" },
+  "arquinho":          { emoji: "🎀", color: "#FF7043" },
+  "prendedor":         { emoji: "💇", color: "#8D6E63" },
+  "orelha-brilhosa":   { emoji: "👂", color: "#FFC107" },
+};
 
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -100,6 +124,9 @@ export default function PesquisaPage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
 
+  // Prize
+  const [prize, setPrize] = useState<PrizeResult | null>(null);
+
   const handleRegister = useCallback(async () => {
     if (!name.trim() || name.trim().length < 3) {
       toast.error("Nome deve ter pelo menos 3 caracteres");
@@ -143,6 +170,7 @@ export default function PesquisaPage() {
       setLeadName(data.name);
 
       if (data.already_answered) {
+        if (data.prize) setPrize(data.prize);
         setState("result");
       } else {
         setState("survey");
@@ -185,6 +213,7 @@ export default function PesquisaPage() {
           return;
         }
 
+        if (data.prize) setPrize(data.prize);
         setState("result");
       } catch {
         toast.error("Erro de conexão. Tente novamente.");
@@ -406,20 +435,47 @@ export default function PesquisaPage() {
                 </p>
               </div>
 
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="card-keepit p-6 w-full bg-keepit-brand/10 border-2 border-keepit-brand/20"
-              >
-                <span className="text-5xl block mb-3">{SURVEY_PRIZE.emoji}</span>
-                <h3 className="text-2xl font-black text-keepit-brand">
-                  {SURVEY_PRIZE.name}
-                </h3>
-              </motion.div>
+              {prize && (() => {
+                const display = PRIZE_DISPLAY[prize.slug] || { emoji: "🎁", color: "#34BF58" };
+                const emoji = prize.emoji || display.emoji;
+                const color = prize.color || display.color;
+                return (
+                  <>
+                    <p className="text-keepit-dark/50 text-sm">Você ganhou:</p>
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="card-keepit p-6 w-full"
+                      style={{ backgroundColor: `${color}15`, border: `2px solid ${color}30` }}
+                    >
+                      <span className="text-5xl block mb-3">{emoji}</span>
+                      <h3 className="text-2xl font-black" style={{ color }}>
+                        {prize.name}
+                      </h3>
+                    </motion.div>
+                  </>
+                );
+              })()}
+
+              {!prize && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="card-keepit p-6 w-full bg-keepit-brand/10 border-2 border-keepit-brand/20"
+                >
+                  <span className="text-5xl block mb-3">🎁</span>
+                  <h3 className="text-2xl font-black text-keepit-brand">
+                    Brinde Surpresa
+                  </h3>
+                </motion.div>
+              )}
 
               <div className="card-keepit p-4 w-full">
-                <p className="text-sm text-keepit-dark/70">{SURVEY_PRIZE.description}</p>
+                <p className="text-sm text-keepit-dark/70">
+                  Retire seu brinde no stand da Keepit! Mostre esta tela para nossa equipe.
+                </p>
               </div>
             </motion.div>
           )}

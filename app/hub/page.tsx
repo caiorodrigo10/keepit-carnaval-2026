@@ -21,6 +21,9 @@ import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { HubPageSkeleton } from "@/components/ui/skeleton";
 
+import { Input } from "@/components/ui/input";
+import { Loader2 as Spinner } from "lucide-react";
+import { Toaster, toast } from "sonner";
 import { getStoredLead, type StoredLead } from "@/lib/lead-storage";
 
 /* ------------------------------------------------------------------ */
@@ -88,7 +91,58 @@ export default function HubPage() {
   const [leadData, setLeadData] = useState<StoredLead | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [showSorteio, setShowSorteio] = useState(false);
+  const [showFranquia, setShowFranquia] = useState(false);
+  const [franquiaSubmitted, setFranquiaSubmitted] = useState(false);
+  const [franquiaLoading, setFranquiaLoading] = useState(false);
+  const [fName, setFName] = useState("");
+  const [fEmail, setFEmail] = useState("");
+  const [fPhone, setFPhone] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  function formatPhone(value: string): string {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+
+  async function handleFranquiaSubmit() {
+    if (!fName.trim() || fName.trim().length < 3) {
+      toast.error("Nome deve ter pelo menos 3 caracteres");
+      return;
+    }
+    if (!fEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fEmail)) {
+      toast.error("Email inválido");
+      return;
+    }
+    if (fPhone.replace(/\D/g, "").length < 10) {
+      toast.error("Telefone inválido (inclua o DDD)");
+      return;
+    }
+
+    setFranquiaLoading(true);
+    try {
+      const res = await fetch("/api/franquia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fName.trim(),
+          email: fEmail.trim(),
+          phone: fPhone.replace(/\D/g, ""),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Erro ao enviar");
+        return;
+      }
+      setFranquiaSubmitted(true);
+    } catch {
+      toast.error("Erro de conexão. Tente novamente.");
+    } finally {
+      setFranquiaLoading(false);
+    }
+  }
 
   // Auto-scroll product carousel (needs isReady so it runs after skeleton is replaced)
   useEffect(() => {
@@ -124,6 +178,7 @@ export default function HubPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAF9]">
+      <Toaster position="top-center" />
       {/* ---- Header ---- */}
       <SharedHeader badge="Carnaval 2026" showBack={false} />
 
@@ -323,11 +378,11 @@ export default function HubPage() {
                 Conheça a <span className="text-gradient-green">Keepit</span>
               </h2>
               <p className="text-keepit-dark/60 text-base md:text-lg max-w-lg mb-5 md:mb-8">
-                Armários inteligentes para guarda-volumes. Seja um franqueado e
+                Lojas inteligentes de autoatendimento. Seja um franqueado e
                 faça parte desta revolução!
               </p>
               <Button
-                onClick={() => window.open("https://globalkeepit.com", "_blank")}
+                onClick={() => setShowFranquia(true)}
                 className="btn-pill btn-pill-primary inline-flex items-center gap-2"
               >
                 <Gift className="h-5 w-5" />
@@ -374,6 +429,91 @@ export default function HubPage() {
                 Entendi!
               </Button>
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ---- Franquia Modal ---- */}
+      {showFranquia && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card-keepit p-6 md:p-10 max-w-md w-full relative"
+          >
+            <button
+              onClick={() => { setShowFranquia(false); setFranquiaSubmitted(false); }}
+              className="absolute top-4 right-4 text-keepit-dark/40 hover:text-keepit-dark"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {franquiaSubmitted ? (
+              <div className="flex flex-col items-center text-center">
+                <div className="h-14 w-14 rounded-2xl bg-keepit-brand/15 flex items-center justify-center mb-4">
+                  <Store className="h-7 w-7 text-keepit-brand" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-black tracking-tight text-keepit-dark mb-2">
+                  Recebemos seus dados!
+                </h3>
+                <p className="text-keepit-dark/60 text-sm md:text-base mb-4">
+                  Nossa equipe entrará em contato em breve para conversar sobre a franquia Keepit.
+                </p>
+                <Button
+                  onClick={() => { setShowFranquia(false); setFranquiaSubmitted(false); }}
+                  className="btn-pill btn-pill-primary mt-2"
+                >
+                  Fechar
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                <div className="h-14 w-14 rounded-2xl bg-keepit-brand/15 flex items-center justify-center mb-4">
+                  <Store className="h-7 w-7 text-keepit-brand" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-black tracking-tight text-keepit-dark mb-2">
+                  Seja um Franqueado
+                </h3>
+                <p className="text-keepit-dark/60 text-sm md:text-base mb-5">
+                  Preencha seus dados e nossa equipe entrará em contato.
+                </p>
+
+                <div className="w-full space-y-3 mb-5">
+                  <Input
+                    placeholder="Seu nome completo"
+                    value={fName}
+                    onChange={(e) => setFName(e.target.value)}
+                    className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Seu email"
+                    value={fEmail}
+                    onChange={(e) => setFEmail(e.target.value)}
+                    className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="(XX) XXXXX-XXXX"
+                    value={fPhone}
+                    onChange={(e) => setFPhone(formatPhone(e.target.value))}
+                    className="bg-white border-keepit-dark/10 text-keepit-dark placeholder:text-keepit-dark/40 h-12 rounded-xl"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleFranquiaSubmit}
+                  disabled={franquiaLoading}
+                  className="btn-pill btn-pill-primary w-full h-12 text-base"
+                >
+                  {franquiaLoading ? (
+                    <Spinner className="w-5 h-5 animate-spin" />
+                  ) : (
+                    "Enviar"
+                  )}
+                </Button>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       // Check if already answered survey
       const { data: survey } = await supabase
         .from("survey_responses")
-        .select("id")
+        .select("id, prize_slug, prize_name")
         .eq("lead_id", leadId)
         .single();
 
@@ -63,6 +63,9 @@ export async function POST(request: Request) {
           lead_id: leadId,
           name: leadName,
           already_answered: true,
+          prize: survey.prize_slug
+            ? { slug: survey.prize_slug, name: survey.prize_name }
+            : null,
         });
       }
     } else {

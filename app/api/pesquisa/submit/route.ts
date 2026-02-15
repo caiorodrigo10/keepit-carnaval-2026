@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { SURVEY_QUESTIONS } from "@/lib/pesquisa/questions";
+import { drawPrize } from "@/lib/roleta/prizes";
 
 interface SubmitBody {
   lead_id: string;
@@ -42,20 +43,30 @@ export async function POST(request: Request) {
     // Check if already answered
     const { data: existing } = await supabase
       .from("survey_responses")
-      .select("id")
+      .select("id, prize_slug, prize_name")
       .eq("lead_id", body.lead_id)
       .single();
 
     if (existing) {
-      return NextResponse.json({ already_answered: true });
+      return NextResponse.json({
+        already_answered: true,
+        prize: existing.prize_slug
+          ? { slug: existing.prize_slug, name: existing.prize_name }
+          : null,
+      });
     }
 
-    // Save response
+    // Draw a prize
+    const prize = drawPrize();
+
+    // Save response with prize
     const { error: insertError } = await supabase
       .from("survey_responses")
       .insert({
         lead_id: body.lead_id,
         answers: body.answers,
+        prize_slug: prize.slug,
+        prize_name: prize.name,
       });
 
     if (insertError) {
@@ -65,7 +76,10 @@ export async function POST(request: Request) {
       throw insertError;
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      prize: { slug: prize.slug, name: prize.name, emoji: prize.emoji, color: prize.color },
+    });
   } catch (error) {
     console.error("[pesquisa/submit] Error:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

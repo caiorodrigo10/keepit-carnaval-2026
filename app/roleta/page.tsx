@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster, toast } from "sonner";
 import { PartyPopper, Loader2, Gift } from "lucide-react";
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SharedHeader } from "@/components/shared-header";
 
-// Prize config (client-side copy for wheel rendering — no probabilities exposed)
-const WHEEL_PRIZES = [
+// Prize config (client-side — no probabilities exposed)
+const PRIZES = [
   { slug: "carregador",        name: "Carregador Portátil",  color: "#34BF58", emoji: "🔋" },
   { slug: "capa-chuva",        name: "Capa de Chuva",        color: "#4ECDC4", emoji: "🌧️" },
   { slug: "energy-now",        name: "Energy Now",           color: "#FFD700", emoji: "⚡" },
@@ -25,7 +25,7 @@ const WHEEL_PRIZES = [
   { slug: "orelha-brilhosa",   name: "Orelha Brilhosa",     color: "#FFC107", emoji: "👂" },
 ];
 
-type PageState = "register" | "wheel" | "spinning" | "result";
+type PageState = "register" | "slot" | "spinning" | "result";
 
 interface SpinResult {
   slug: string;
@@ -39,6 +39,126 @@ function formatPhone(value: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+/* ─── Slot Reel ─── */
+const CELL_H = 72;
+
+function SlotReel({
+  winnerSlug,
+  duration,
+  spinning,
+  spinKey,
+}: {
+  winnerSlug: string;
+  duration: number;
+  spinning: boolean;
+  spinKey: number;
+}) {
+  const winIdx = Math.max(0, PRIZES.findIndex((p) => p.slug === winnerSlug));
+
+  const strip = useMemo(() => {
+    const items: typeof PRIZES = [];
+    // 3 random items visible initially
+    for (let i = 0; i < 3; i++) {
+      items.push(PRIZES[Math.floor(Math.random() * PRIZES.length)]);
+    }
+    // 3-4 full shuffled cycles
+    const cycles = 3 + Math.floor(Math.random() * 2);
+    for (let c = 0; c < cycles; c++) {
+      const shuffled = [...PRIZES].sort(() => Math.random() - 0.5);
+      items.push(...shuffled);
+    }
+    // Final 3 visible: prev → WINNER → next
+    const prev = (winIdx - 1 + PRIZES.length) % PRIZES.length;
+    const next = (winIdx + 1) % PRIZES.length;
+    items.push(PRIZES[prev]);
+    items.push(PRIZES[winIdx]);
+    items.push(PRIZES[next]);
+    return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [winIdx, spinKey]);
+
+  // Center the winner (second-to-last item) in viewport
+  const finalY = -(strip.length - 2) * CELL_H + CELL_H;
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl bg-white border-2 border-keepit-dark/10"
+      style={{ height: CELL_H * 3 }}
+    >
+      {/* Fade gradient top/bottom */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(248,250,249,0.95) 0%, transparent 30%, transparent 70%, rgba(248,250,249,0.95) 100%)",
+        }}
+      />
+      {/* Center highlight */}
+      <div
+        className="absolute left-0 right-0 z-[5] border-y-2 border-keepit-brand/40 bg-keepit-brand/5"
+        style={{ top: CELL_H, height: CELL_H }}
+      />
+
+      <motion.div
+        key={spinKey}
+        initial={{ y: 0 }}
+        animate={{ y: spinning ? finalY : 0 }}
+        transition={
+          spinning
+            ? { duration, ease: [0.06, 0.6, 0.12, 1] }
+            : { duration: 0 }
+        }
+      >
+        {strip.map((prize, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-center"
+            style={{ height: CELL_H }}
+          >
+            <span className="text-[2rem] select-none">{prize.emoji}</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Flashing lights around the machine ─── */
+function SlotLights({ active }: { active: boolean }) {
+  return (
+    <div className="absolute -inset-3 z-0 pointer-events-none">
+      {Array.from({ length: 20 }).map((_, i) => {
+        const angle = (i / 20) * 360;
+        const rad = (angle * Math.PI) / 180;
+        const x = 50 + 50 * Math.cos(rad);
+        const y = 50 + 50 * Math.sin(rad);
+        return (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full"
+            style={{
+              left: `${x}%`,
+              top: `${y}%`,
+              backgroundColor: i % 2 === 0 ? "#34BF58" : "#FFD700",
+            }}
+            animate={
+              active
+                ? { opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }
+                : { opacity: 0.2, scale: 0.8 }
+            }
+            transition={
+              active
+                ? { duration: 0.6, repeat: Infinity, delay: i * 0.05 }
+                : { duration: 0.3 }
+            }
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Main Page ─── */
 export default function RoletaPage() {
   const [state, setState] = useState<PageState>("register");
 
@@ -53,10 +173,18 @@ export default function RoletaPage() {
   const [leadId, setLeadId] = useState<string | null>(null);
   const [leadName, setLeadName] = useState("");
 
-  // Wheel
-  const [rotation, setRotation] = useState(0);
+  // Slot
   const [result, setResult] = useState<SpinResult | null>(null);
-  const wheelRef = useRef<HTMLDivElement>(null);
+  const [spinKey, setSpinKey] = useState(0);
+  const [isCallingApi, setIsCallingApi] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   // Register
   const handleRegister = useCallback(async () => {
@@ -100,7 +228,7 @@ export default function RoletaPage() {
         setResult(data.prize);
         setState("result");
       } else {
-        setState("wheel");
+        setState("slot");
       }
     } catch {
       toast.error("Erro de conexão. Tente novamente.");
@@ -109,12 +237,11 @@ export default function RoletaPage() {
     }
   }, [name, email, phone, lgpd]);
 
-  // Spin
-  const handleSpin = useCallback(async () => {
+  // Play slot
+  const handlePlay = useCallback(async () => {
     if (!leadId) return;
 
-    setState("spinning");
-
+    setIsCallingApi(true);
     try {
       const res = await fetch("/api/roleta/spin", {
         method: "POST",
@@ -125,39 +252,36 @@ export default function RoletaPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Erro ao girar");
-        setState("wheel");
+        toast.error(data.error || "Erro ao jogar");
+        setIsCallingApi(false);
         return;
       }
 
       const prize = data.prize as SpinResult;
       setResult(prize);
+      setSpinKey((k) => k + 1);
+      setState("spinning");
+      setIsCallingApi(false);
 
-      const prizeIndex = WHEEL_PRIZES.findIndex((p) => p.slug === prize.slug);
-      const segmentAngle = 360 / WHEEL_PRIZES.length;
-      const targetAngle = 360 - (prizeIndex * segmentAngle + segmentAngle / 2);
-      const extraSpins = 5 + Math.floor(Math.random() * 3);
-      const totalRotation = rotation + extraSpins * 360 + targetAngle + (Math.random() * 10 - 5);
-
-      setRotation(totalRotation);
-
-      setTimeout(() => {
+      // Show result after reels stop (longest reel = ~3.8s)
+      timerRef.current = setTimeout(() => {
         setState("result");
-      }, 4500);
+      }, 4200);
     } catch {
       toast.error("Erro de conexão. Tente novamente.");
-      setState("wheel");
+      setIsCallingApi(false);
     }
-  }, [leadId, rotation]);
+  }, [leadId]);
 
-  // Get winning prize data for display
-  const winningPrize = result ? WHEEL_PRIZES.find((p) => p.slug === result.slug) : null;
+  // Get winning prize for display
+  const winningPrize = result ? PRIZES.find((p) => p.slug === result.slug) : null;
+  const winnerSlug = result?.slug || PRIZES[0].slug;
 
   return (
     <div className="min-h-screen bg-[#F8FAF9]">
       <Toaster position="top-center" />
 
-      <SharedHeader title="Roleta" badge="Carnaval 2026" showBack={false} />
+      <SharedHeader title="Prêmios" badge="Carnaval 2026" showBack={false} />
 
       <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
         <AnimatePresence mode="wait">
@@ -175,7 +299,7 @@ export default function RoletaPage() {
                   <Gift className="w-8 h-8 text-keepit-brand" />
                 </div>
                 <h2 className="text-xl font-black tracking-tight text-keepit-dark">Preencha seus dados</h2>
-                <p className="text-keepit-dark/50 text-sm mt-1">para girar a roleta de premios</p>
+                <p className="text-keepit-dark/50 text-sm mt-1">para concorrer a prêmios</p>
               </div>
 
               <div className="space-y-3">
@@ -227,115 +351,78 @@ export default function RoletaPage() {
             </motion.div>
           )}
 
-          {/* WHEEL */}
-          {(state === "wheel" || state === "spinning") && (
+          {/* SLOT MACHINE */}
+          {(state === "slot" || state === "spinning") && (
             <motion.div
-              key="wheel"
+              key="slot"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-sm flex flex-col items-center gap-6"
+              className="w-full max-w-sm flex flex-col items-center gap-5"
             >
               <p className="text-lg font-black text-keepit-dark">
                 Olá, <span className="text-keepit-brand">{leadName.split(" ")[0]}</span>!
               </p>
 
-              {/* Wheel container */}
-              <div className="relative w-72 h-72 sm:w-80 sm:h-80">
-                {/* Pointer (top center) */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-                  <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-keepit-dark drop-shadow-lg" />
+              {/* Slot machine frame */}
+              <div className="relative w-full">
+                <SlotLights active={state === "spinning"} />
+
+                <div className="relative z-[1] rounded-3xl bg-keepit-dark p-4 shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
+                  {/* Header */}
+                  <div className="text-center mb-3">
+                    <span className="text-2xl">🎰</span>
+                    <h3 className="text-sm font-black text-white/90 tracking-wider uppercase">
+                      Caça-Níquel de Prêmios
+                    </h3>
+                  </div>
+
+                  {/* 3 Reels */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <SlotReel
+                      winnerSlug={winnerSlug}
+                      duration={2.5}
+                      spinning={state === "spinning"}
+                      spinKey={spinKey}
+                    />
+                    <SlotReel
+                      winnerSlug={winnerSlug}
+                      duration={3.2}
+                      spinning={state === "spinning"}
+                      spinKey={spinKey}
+                    />
+                    <SlotReel
+                      winnerSlug={winnerSlug}
+                      duration={3.8}
+                      spinning={state === "spinning"}
+                      spinKey={spinKey}
+                    />
+                  </div>
+
+                  {/* Bottom decoration */}
+                  <div className="flex justify-center gap-1 mt-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-2 h-2 rounded-full bg-keepit-brand/60"
+                      />
+                    ))}
+                  </div>
                 </div>
-
-                {/* Wheel */}
-                <motion.div
-                  ref={wheelRef}
-                  className="w-full h-full rounded-full border-4 border-keepit-dark/10 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.08)]"
-                  animate={{ rotate: rotation }}
-                  transition={{
-                    duration: state === "spinning" ? 4 : 0,
-                    ease: [0.2, 0.8, 0.3, 1],
-                  }}
-                >
-                  <svg viewBox="0 0 200 200" className="w-full h-full">
-                    {WHEEL_PRIZES.map((prize, i) => {
-                      const segAngle = 360 / WHEEL_PRIZES.length;
-                      const startAngle = i * segAngle - 90;
-                      const endAngle = startAngle + segAngle;
-                      const startRad = (startAngle * Math.PI) / 180;
-                      const endRad = (endAngle * Math.PI) / 180;
-                      const x1 = 100 + 100 * Math.cos(startRad);
-                      const y1 = 100 + 100 * Math.sin(startRad);
-                      const x2 = 100 + 100 * Math.cos(endRad);
-                      const y2 = 100 + 100 * Math.sin(endRad);
-                      const largeArc = segAngle > 180 ? 1 : 0;
-
-                      const midAngleDeg = (startAngle + endAngle) / 2;
-                      const midAngleRad = (midAngleDeg * Math.PI) / 180;
-
-                      // Flip text on left half so it stays readable
-                      const norm = ((midAngleDeg % 360) + 360) % 360;
-                      const flip = norm > 90 && norm < 270;
-                      const textRot = flip ? midAngleDeg + 180 : midAngleDeg;
-
-                      // Emoji near outer edge, name in middle of segment
-                      const emojiR = 80;
-                      const nameR = 55;
-                      const emojiX = 100 + emojiR * Math.cos(midAngleRad);
-                      const emojiY = 100 + emojiR * Math.sin(midAngleRad);
-                      const nameX = 100 + nameR * Math.cos(midAngleRad);
-                      const nameY = 100 + nameR * Math.sin(midAngleRad);
-
-                      return (
-                        <g key={prize.slug}>
-                          <path
-                            d={`M100,100 L${x1},${y1} A100,100 0 ${largeArc},1 ${x2},${y2} Z`}
-                            fill={prize.color}
-                            stroke="rgba(255,255,255,0.5)"
-                            strokeWidth="1"
-                          />
-                          <text
-                            x={emojiX}
-                            y={emojiY}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            transform={`rotate(${textRot}, ${emojiX}, ${emojiY})`}
-                            className="text-[6px] fill-black/80"
-                          >
-                            {prize.emoji}
-                          </text>
-                          <text
-                            x={nameX}
-                            y={nameY}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            transform={`rotate(${textRot}, ${nameX}, ${nameY})`}
-                            className="text-[3.8px] font-bold fill-black/80"
-                          >
-                            {prize.name.length > 14 ? prize.name.slice(0, 14) + "…" : prize.name}
-                          </text>
-                        </g>
-                      );
-                    })}
-                    {/* Center circle */}
-                    <circle cx="100" cy="100" r="18" fill="white" stroke="#1A1A1A" strokeWidth="2" />
-                    <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" className="text-[8px] font-black fill-keepit-brand">
-                      KEEPIT
-                    </text>
-                  </svg>
-                </motion.div>
               </div>
 
-              {/* Spin button */}
+              {/* Play button */}
               <Button
-                onClick={handleSpin}
-                disabled={state === "spinning"}
-                className="btn-pill btn-pill-primary w-48 h-14 text-lg font-black shadow-[0_4px_20px_rgba(52,191,88,0.3)]"
+                onClick={handlePlay}
+                disabled={state === "spinning" || isCallingApi}
+                className="btn-pill btn-pill-primary w-52 h-14 text-lg font-black shadow-[0_4px_20px_rgba(52,191,88,0.3)]"
               >
                 {state === "spinning" ? (
                   <Loader2 className="w-6 h-6 animate-spin" />
+                ) : isCallingApi ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
-                  "GIRAR!"
+                  "🎰 JOGAR!"
                 )}
               </Button>
             </motion.div>
